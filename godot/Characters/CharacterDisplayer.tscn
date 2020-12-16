@@ -1,0 +1,21 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://Characters/CharacterDisplayer.gd" type="Script" id=1]
+[ext_resource path="res://Characters/bear.png" type="Texture" id=2]
+
+[node name="CharacterDisplayer" type="Node2D"]
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_vertical_guides_": [ 1920.49 ]
+}
+
+[node name="Left" type="Sprite" parent="."]
+position = Vector2( 330.836, -184.674 )
+texture = ExtResource( 2 )
+
+[node name="Right" type="Sprite" parent="."]
+position = Vector2( 1592.01, -184.674 )
+texture = ExtResource( 2 )
+flip_h = true
+
+[node name="Tween" type="Tween" parent="."]

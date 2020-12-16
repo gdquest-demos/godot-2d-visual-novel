@@ -8,11 +8,52 @@
 
 config_version=4
 
+_global_script_classes=[ {
+"base": "Resource",
+"class": "Character",
+"language": "GDScript",
+"path": "res://Characters/Character.gd"
+}, {
+"base": "Node",
+"class": "CharacterDisplayer",
+"language": "GDScript",
+"path": "res://Characters/CharacterDisplayer.gd"
+}, {
+"base": "Reference",
+"class": "CharacterLoader",
+"language": "GDScript",
+"path": "res://Characters/CharacterLoader.gd"
+}, {
+"base": "Node",
+"class": "ScenePlayer",
+"language": "GDScript",
+"path": "res://ScenePlayer.gd"
+} ]
+_global_script_class_icons={
+"Character": "",
+"CharacterDisplayer": "",
+"CharacterLoader": "",
+"ScenePlayer": ""
+}
+
 [application]
 
 config/name="2D Visual Novel"
 run/main_scene="res://Main.tscn"
 config/icon="res://icon.png"
+
+[autoload]
+
+CharactersDB="*res://Characters/CharactersDB.gd"
+
+[debug]
+
+gdscript/warnings/return_value_discarded=false
+
+[display]
+
+window/size/width=1920
+window/size/height=1080
 
 [rendering]
 

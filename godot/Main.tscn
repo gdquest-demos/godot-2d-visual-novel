@@ -1,9 +1,13 @@
-[gd_scene load_steps=3 format=2]
+[gd_scene load_steps=4 format=2]
 
 [ext_resource path="res://TextBox.tscn" type="PackedScene" id=1]
 [ext_resource path="res://Main.gd" type="Script" id=2]
+[ext_resource path="res://Characters/CharacterDisplayer.tscn" type="PackedScene" id=3]
 
 [node name="Main" type="Node"]
 script = ExtResource( 2 )
+
+[node name="CharacterDisplayer" parent="." instance=ExtResource( 3 )]
+position = Vector2( 0, 842 )
 
 [node name="TextBox" parent="." instance=ExtResource( 1 )]

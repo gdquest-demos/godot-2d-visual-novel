@@ -1,0 +1,15 @@
+[gd_resource type="Resource" load_steps=3 format=2]
+
+[ext_resource path="res://Characters/Character.gd" type="Script" id=1]
+[ext_resource path="res://Characters/bear.png" type="Texture" id=2]
+
+[resource]
+script = ExtResource( 1 )
+id = "bear"
+display_name = "Bear"
+bio = "A nice bear."
+age = 24
+default_image = "neutral"
+images = {
+"neutral": ExtResource( 2 )
+}
