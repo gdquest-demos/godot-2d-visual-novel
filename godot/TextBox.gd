@@ -39,6 +39,7 @@ func set_bbcode_text(text: String) -> void:
 	if not is_inside_tree():
 		yield(self, "ready")
 
+	_blinking_arrow.hide()
 	_rich_text_label.bbcode_text = bbcode_text
 	# Required for the `_rich_text_label`'s  text to update and the code below to work.
 	call_deferred("_begin_dialogue_display")
