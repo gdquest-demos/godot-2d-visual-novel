@@ -41,7 +41,10 @@ func set_bbcode_text(text: String) -> void:
 
 	_rich_text_label.bbcode_text = bbcode_text
 	# Required for the `_rich_text_label`'s  text to update and the code below to work.
-	yield(get_tree(), "idle_frame")
+	call_deferred("_begin_dialogue_display")
+
+
+func _begin_dialogue_display() -> void:
 	var character_count := _rich_text_label.get_total_character_count()
 	_tween.interpolate_property(
 		_rich_text_label, "visible_characters", 0, character_count, character_count / display_speed
