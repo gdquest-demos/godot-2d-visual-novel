@@ -51,7 +51,7 @@ _global_script_class_icons={
 [application]
 
 config/name="2D Visual Novel"
-run/main_scene="res://Main.tscn"
+run/main_scene="res://ScenePlayer.tscn"
 config/icon="res://icon.png"
 
 [autoload]

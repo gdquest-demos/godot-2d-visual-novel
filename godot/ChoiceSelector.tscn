@@ -13,3 +13,8 @@ script = ExtResource( 1 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="Label" type="Label" parent="."]
+visible = false
+margin_right = 1824.0
+margin_bottom = 14.0
