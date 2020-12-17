@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=2]
+[gd_scene load_steps=4 format=2]
 
 [ext_resource path="res://TextBox.gd" type="Script" id=1]
 [ext_resource path="res://BlinkingArrow.tscn" type="PackedScene" id=2]
+[ext_resource path="res://FadeAnimationPlayer.tscn" type="PackedScene" id=3]
 
 [node name="TextBox" type="Panel"]
 anchor_top = 1.0
@@ -50,4 +51,6 @@ margin_left = -8.0
 margin_top = -8.0
 margin_right = -8.0
 margin_bottom = -8.0
+
+[node name="FadeAnimationPlayer" parent="." instance=ExtResource( 3 )]
 [connection signal="tween_all_completed" from="Tween" to="." method="_on_Tween_tween_all_completed"]

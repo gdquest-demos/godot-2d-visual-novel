@@ -17,6 +17,13 @@ onready var _name_label: Label = $NameLabel
 onready var _rich_text_label: RichTextLabel = $RichTextLabel
 onready var _tween: Tween = $Tween
 onready var _blinking_arrow: Control = $BlinkingArrow
+onready var _anim_player: AnimationPlayer = $FadeAnimationPlayer
+
+
+func _ready() -> void:
+	_name_label.text = ""
+	_rich_text_label.bbcode_text = ""
+	_rich_text_label.visible_characters = 0
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -69,6 +76,17 @@ func _begin_dialogue_display() -> void:
 
 func _display_all_content() -> void:
 	_tween.seek(10000)
+
+
+func fade_in_async() -> void:
+	_anim_player.play("fade_in")
+	yield(_anim_player, "animation_finished")
+
+
+func fade_out_async() -> void:
+	_anim_player.play("fade_out")
+	yield(_anim_player, "animation_finished")
+
 
 
 func _on_Tween_tween_all_completed() -> void:

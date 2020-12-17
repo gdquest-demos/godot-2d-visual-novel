@@ -37,13 +37,20 @@ var _dialogue_data = {
 
 onready var _text_box := $TextBox
 onready var _character_displayer := $CharacterDisplayer
+onready var _anim_player: AnimationPlayer = $FadeAnimationPlayer
 
 
 func _ready() -> void:
-	run_dialogue_sequence()
+	_text_box.hide()
+	yield(_fade_in_async(), "completed")
+	yield(run_dialogue_sequence_async(), "completed")
+	yield(_fade_out_async(), "completed")
 
 
-func run_dialogue_sequence() -> void:
+func run_dialogue_sequence_async() -> void:
+	_text_box.show()
+	yield(_text_box.fade_in_async(), "completed")
+
 	var key = _dialogue_data.keys()[0]
 	while key != -1:
 		var node: Dictionary = _dialogue_data[key]
@@ -67,5 +74,16 @@ func run_dialogue_sequence() -> void:
 		if node.has("finished"):
 			break
 
+	yield(_text_box.fade_out_async(), "completed")
 	_text_box.hide()
 	_character_displayer.hide()
+
+
+func _fade_in_async() -> void:
+	_anim_player.play("fade_in")
+	yield(_anim_player, "animation_finished")
+
+
+func _fade_out_async() -> void:
+	_anim_player.play("fade_out")
+	yield(_anim_player, "animation_finished")
