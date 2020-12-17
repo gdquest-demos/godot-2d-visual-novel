@@ -5,6 +5,9 @@ extends Control
 signal display_finished
 ## Emitted when the next line was requested
 signal next_requested
+signal choice_made(target_id)
+
+const ChoiceSelector := preload("res://ChoiceSelector.tscn")
 
 ## Speed at which the characters appear in the text body in characters per second.
 export var display_speed := 20.0
@@ -33,6 +36,14 @@ func display(text: String, character_name := "", speed := display_speed) -> void
 	if speed != display_speed:
 		display_speed = speed
 
+func display_choice(choices: Array) -> void:
+	_name_label.hide()
+	_rich_text_label.hide()
+	var choice_selector: ChoiceSelector = ChoiceSelector.instance()
+	add_child(choice_selector)
+	choice_selector.setup(choices)
+	choice_selector.connect("choice_made", self, "_on_ChoiceSelector_choice_made")
+
 
 func set_bbcode_text(text: String) -> void:
 	bbcode_text = text
@@ -60,3 +71,9 @@ func _display_all_content() -> void:
 func _on_Tween_tween_all_completed() -> void:
 	emit_signal("display_finished")
 	_blinking_arrow.visible = true
+
+
+func _on_ChoiceSelector_choice_made(target_id: int) -> void:
+	emit_signal("choice_made", target_id)
+	_name_label.show()
+	_rich_text_label.show()

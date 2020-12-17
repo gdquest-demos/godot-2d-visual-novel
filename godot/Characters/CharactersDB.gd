@@ -5,8 +5,7 @@ onready var _characters := _load_characters("res://Characters/")
 
 
 func get_character(character_id: String) -> Character:
-	assert(character_id in _characters)
-	return _characters[character_id]
+	return _characters[character_id] if _characters.has(character_id) else null
 
 
 ## Finds and loads [Character] resources in the directory corresponding to `directory_path` and

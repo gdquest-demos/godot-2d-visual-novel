@@ -24,6 +24,16 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://Characters/CharacterLoader.gd"
 }, {
+"base": "Reference",
+"class": "Choice",
+"language": "GDScript",
+"path": "res://Choice.gd"
+}, {
+"base": "VBoxContainer",
+"class": "ChoiceSelector",
+"language": "GDScript",
+"path": "res://ChoiceSelector.gd"
+}, {
 "base": "Node",
 "class": "ScenePlayer",
 "language": "GDScript",
@@ -33,6 +43,8 @@ _global_script_class_icons={
 "Character": "",
 "CharacterDisplayer": "",
 "CharacterLoader": "",
+"Choice": "",
+"ChoiceSelector": "",
 "ScenePlayer": ""
 }
 
@@ -54,6 +66,10 @@ gdscript/warnings/return_value_discarded=false
 
 window/size/width=1920
 window/size/height=1080
+
+[editor_plugins]
+
+enabled=PoolStringArray( "dialogic" )
 
 [rendering]
 
