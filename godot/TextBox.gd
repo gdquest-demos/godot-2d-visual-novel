@@ -40,6 +40,8 @@ func display(text: String, character_name := "", speed := display_speed) -> void
 func display_choice(choices: Array) -> void:
 	_name_label.hide()
 	_rich_text_label.hide()
+	_blinking_arrow.hide()
+
 	var choice_selector: ChoiceSelector = ChoiceSelector.instance()
 	add_child(choice_selector)
 	choice_selector.setup(choices)

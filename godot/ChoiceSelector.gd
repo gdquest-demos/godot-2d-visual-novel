@@ -10,7 +10,7 @@ func setup(choices: Array) -> void:
 		button.text = choice.label
 		button.connect("pressed", self, "_on_Button_pressed", [choice.target])
 		add_child(button)
-	get_child(0).grab_focus()
+	(get_child(0) as Button).grab_focus()
 
 
 func _on_Button_pressed(target_id: int) -> void:
