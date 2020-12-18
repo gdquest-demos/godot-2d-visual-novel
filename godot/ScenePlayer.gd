@@ -2,50 +2,10 @@
 class_name ScenePlayer
 extends Node
 
+signal scene_finished
 signal transition_finished
 
-var _scene_data = {
-	0:
-	{
-		transition = "fade_in",
-		next = 1,
-	},
-	1:
-	{
-		character = "bear",
-		line = "Hi there! My name's Bear. How about you?",
-		next = 2,
-	},
-	2:
-	{
-		character = "cat",
-		line = "Hey, I'm Cat.",
-		next = 3,
-	},
-	3:
-	{
-		choice = [
-			Choice.new("Start over", 1), Choice.new("Continue", 4), Choice.new("Jump ahead", 5)
-		]
-	},
-	4:
-	{
-		character = "bear",
-		line = "Well, let's continue.",
-		next = 5,
-	},
-	5:
-	{
-		character = "cat",
-		line = "Did you jump ahead?",
-		next = 6,
-	},
-	6:
-	{
-		next = -1,
-		transition = "fade_out",
-	}
-}
+var _scene_data := {}
 
 ## Maps transition keys to a corresponding function to call.
 const TRANSITIONS := {
@@ -60,10 +20,13 @@ onready var _anim_player: AnimationPlayer = $FadeAnimationPlayer
 
 func _ready() -> void:
 	_text_box.hide()
-	yield(run_scene_async(), "completed")
+#	var file := File.new()
+#	file.open("res://Scenes/1.scene", File.WRITE)
+#	file.store_string(var2str(_scene_data))
+#	file.close()
 
 
-func run_scene_async() -> void:
+func run_scene() -> void:
 	var key = _scene_data.keys()[0]
 	while key != -1:
 		var node: Dictionary = _scene_data[key]
@@ -85,9 +48,9 @@ func run_scene_async() -> void:
 			yield(self, "transition_finished")
 			key = node.next
 
-		# Choice.
-		elif "choice" in node:
-			_text_box.display_choice(node.choice)
+		# Choices.
+		elif "choices" in node:
+			_text_box.display_choice(node.choices)
 			var next_node_key = yield(_text_box, "choice_made")
 			key = next_node_key
 
@@ -95,14 +58,14 @@ func run_scene_async() -> void:
 			break
 
 	_character_displayer.hide()
+	emit_signal("scene_finished")
 
 
-func load_scene(file_path: String) -> Dictionary:
+func load_scene(file_path: String) -> void:
 	var file := File.new()
 	file.open(file_path, File.READ)
-	var data: Dictionary = str2var(file.get_as_text())
+	_scene_data = str2var(file.get_as_text())
 	file.close()
-	return data
 
 
 func _appear_async() -> void:
