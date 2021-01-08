@@ -18,8 +18,8 @@ onready var _character_displayer := $CharacterDisplayer
 onready var _anim_player: AnimationPlayer = $FadeAnimationPlayer
 
 
-func _ready() -> void:
-	_text_box.hide()
+# func _ready() -> void:
+# 	_text_box.hide()
 #	var file := File.new()
 #	file.open("res://Scenes/1.scene", File.WRITE)
 #	file.store_string(var2str(_scene_data))

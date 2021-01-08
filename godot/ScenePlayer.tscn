@@ -28,5 +28,6 @@ __meta__ = {
 position = Vector2( 0, 842 )
 
 [node name="TextBox" parent="." instance=ExtResource( 1 )]
+modulate = Color( 1, 1, 1, 0 )
 
 [node name="FadeAnimationPlayer" parent="." instance=ExtResource( 5 )]
