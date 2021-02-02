@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=2]
+[gd_scene load_steps=4 format=2]
 
 [ext_resource path="res://Characters/CharacterDisplayer.gd" type="Script" id=1]
-[ext_resource path="res://Characters/bear.png" type="Texture" id=2]
+[ext_resource path="res://Characters/Sophia.png" type="Texture" id=2]
+[ext_resource path="res://Characters/Dani.png" type="Texture" id=3]
 
 [node name="CharacterDisplayer" type="Node2D"]
 script = ExtResource( 1 )
@@ -10,12 +11,12 @@ __meta__ = {
 }
 
 [node name="Left" type="Sprite" parent="."]
-position = Vector2( 330.836, -184.674 )
+position = Vector2( 330.836, 655.203 )
 texture = ExtResource( 2 )
 
 [node name="Right" type="Sprite" parent="."]
-position = Vector2( 1592.01, -184.674 )
-texture = ExtResource( 2 )
+position = Vector2( 1592.01, 655.203 )
+texture = ExtResource( 3 )
 flip_h = true
 
 [node name="Tween" type="Tween" parent="."]

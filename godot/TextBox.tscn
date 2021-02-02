@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=5 format=2]
 
 [ext_resource path="res://TextBox.gd" type="Script" id=1]
 [ext_resource path="res://BlinkingArrow.tscn" type="PackedScene" id=2]
 [ext_resource path="res://FadeAnimationPlayer.tscn" type="PackedScene" id=3]
+[ext_resource path="res://Fonts/montserrat_medium.tres" type="DynamicFont" id=4]
 
 [node name="TextBox" type="Panel"]
 anchor_top = 1.0
@@ -21,6 +22,7 @@ margin_left = 24.0
 margin_top = 19.0
 margin_right = -24.0
 margin_bottom = 42.0
+custom_fonts/font = ExtResource( 4 )
 text = "Character name"
 
 [node name="RichTextLabel" type="RichTextLabel" parent="."]
@@ -30,6 +32,7 @@ margin_left = 24.0
 margin_top = 51.0
 margin_right = -24.0
 margin_bottom = -24.0
+custom_fonts/normal_font = ExtResource( 4 )
 bbcode_enabled = true
 bbcode_text = "Text body"
 meta_underlined = false
