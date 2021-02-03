@@ -41,10 +41,12 @@ func run_scene() -> void:
 			if "character" in node:
 				character = ResourceDB.get_character(node.character)
 
-			var side: String = node["side"] if "side" in node else CharacterDisplayer.SIDE.LEFT
+			var side: String = node.side if "side" in node else CharacterDisplayer.SIDE.LEFT
+			var animation: String = node.get("animation", "")
+			var expression: String = node.get("expression", "")
 
 			_text_box.display(node.line, character.display_name)
-			_character_displayer.display(character, side)
+			_character_displayer.display(character, side, expression, animation)
 			yield(_text_box, "next_requested")
 			key = node.next
 
@@ -59,9 +61,6 @@ func run_scene() -> void:
 			_text_box.display_choice(node.choices)
 			var next_node_key = yield(_text_box, "choice_made")
 			key = next_node_key
-
-		if node.has("finished"):
-			break
 
 	_character_displayer.hide()
 	emit_signal("scene_finished")
