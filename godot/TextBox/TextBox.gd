@@ -21,6 +21,7 @@ onready var _anim_player: AnimationPlayer = $FadeAnimationPlayer
 
 
 func _ready() -> void:
+	visible = false
 	_name_label.text = ""
 	_rich_text_label.bbcode_text = ""
 	_rich_text_label.visible_characters = 0
