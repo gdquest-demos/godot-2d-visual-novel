@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/steppes.jpg-159ab68488b3af56e05d03496372a2a8.stex"
+path="res://.import/industrial-building.jpg-7ce63f9511196829f2d73663b3dd86be.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://steppes.jpg"
-dest_files=[ "res://.import/steppes.jpg-159ab68488b3af56e05d03496372a2a8.stex" ]
+source_file="res://Backgrounds/industrial-building.jpg"
+dest_files=[ "res://.import/industrial-building.jpg-7ce63f9511196829f2d73663b3dd86be.stex" ]
 
 [params]
 

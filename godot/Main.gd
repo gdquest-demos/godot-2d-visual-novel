@@ -14,4 +14,3 @@ func _ready() -> void:
 		scene_player.run_scene()
 		yield(scene_player, "scene_finished")
 		scene_player.queue_free()
-		

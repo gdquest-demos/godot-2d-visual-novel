@@ -32,7 +32,8 @@ func run_scene() -> void:
 		var node: Dictionary = _scene_data[key]
 		
 		if "background" in node:
-			$Background.texture
+			var bg: Background = ResourceDB.get_background(node.background)
+			$Background.texture = bg.texture
 
 		# Normal text reply.
 		if "line" in node:

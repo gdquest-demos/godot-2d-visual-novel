@@ -11,7 +11,7 @@ func get_character(character_id: String) -> Character:
 
 
 func get_background(background_id: String) -> Background:
-	return _characters.get(background_id)
+	return _backgrounds.get(background_id)
 
 
 func _load_characters(directory_path: String) -> Dictionary:

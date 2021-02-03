@@ -1,0 +1,10 @@
+[gd_resource type="Resource" load_steps=3 format=2]
+
+[ext_resource path="res://Backgrounds/industrial-building.jpg" type="Texture" id=1]
+[ext_resource path="res://Backgrounds/Background.gd" type="Script" id=2]
+
+[resource]
+script = ExtResource( 2 )
+id = "industrial_building"
+display_name = "Industrial building"
+texture = ExtResource( 1 )

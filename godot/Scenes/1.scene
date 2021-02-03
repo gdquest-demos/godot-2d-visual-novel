@@ -1,7 +1,7 @@
 {
 0: {
 "next": 1,
-"background": "industrial_corridor",
+"background": "industrial_building",
 "transition": "fade_in"
 },
 1: {
@@ -32,7 +32,7 @@
 "next": 5
 },
 5: {
-"background": "field_1",
+"background": "steppes",
 "character": "dani",
 "line": "Did you jump ahead?",
 "next": 6
