@@ -82,6 +82,7 @@ func _display_all_content() -> void:
 
 func fade_in_async() -> void:
 	_anim_player.play("fade_in")
+	_anim_player.seek(0.0, true)
 	yield(_anim_player, "animation_finished")
 
 
