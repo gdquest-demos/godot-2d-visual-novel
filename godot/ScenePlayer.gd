@@ -16,7 +16,7 @@ const TRANSITIONS := {
 onready var _text_box := $TextBox
 onready var _character_displayer := $CharacterDisplayer
 onready var _anim_player: AnimationPlayer = $FadeAnimationPlayer
-
+onready var _background := $Background
 
 # func _ready() -> void:
 # 	_text_box.hide()
@@ -33,7 +33,7 @@ func run_scene() -> void:
 		
 		if "background" in node:
 			var bg: Background = ResourceDB.get_background(node.background)
-			$Background.texture = bg.texture
+			_background.texture = bg.texture
 
 		# Normal text reply.
 		if "line" in node:
