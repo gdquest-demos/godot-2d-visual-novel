@@ -38,11 +38,13 @@ func run_scene() -> void:
 		# Normal text reply.
 		if "line" in node:
 			var character: Character
-			if node.has("character"):
+			if "character" in node:
 				character = ResourceDB.get_character(node.character)
 
+			var side: String = node["side"] if "side" in node else CharacterDisplayer.SIDE.LEFT
+
 			_text_box.display(node.line, character.display_name)
-			_character_displayer.display(node.character)
+			_character_displayer.display(character, side)
 			yield(_text_box, "next_requested")
 			key = node.next
 

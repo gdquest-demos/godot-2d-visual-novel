@@ -3,7 +3,16 @@
 class_name CharacterDisplayer
 extends Node
 
-enum Side { LEFT, RIGHT }
+const SIDE := {
+	LEFT = "left",
+	RIGHT = "right"
+}
+
+## Keeps track of the character displayed on either side.
+var _displayed := {
+	left = null,
+	right = null
+}
 
 onready var _tween: Tween = $Tween
 onready var _left_sprite: Sprite = $Left
@@ -15,9 +24,17 @@ func _ready() -> void:
 	_right_sprite.hide()
 
 
-func display(character_id: String, side := Side.LEFT, expression := "", animation := "") -> void:
-	var sprite: Sprite = _left_sprite if side == Side.LEFT else _right_sprite
-	var character: Character = ResourceDB.get_character(character_id)
+func display(character: Character, side :String = SIDE.LEFT, expression := "", animation := "") -> void:
+	assert(side in SIDE.values())
+	
+	# Keeps track of a character that's already displayed on a given side
+	var sprite: Sprite = _left_sprite if side == SIDE.LEFT else _right_sprite
+	if character == _displayed.left:
+		sprite = _left_sprite
+	elif character == _displayed.right:
+		sprite = _right_sprite
+	else:
+		_displayed[side] = character
 
 	sprite.texture = character.get_image(expression)
 
