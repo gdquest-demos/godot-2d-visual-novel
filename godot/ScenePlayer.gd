@@ -31,23 +31,25 @@ func run_scene() -> void:
 	var key = _scene_data.keys()[0]
 	while key != -1:
 		var node: Dictionary = _scene_data[key]
+		var character: Character = ResourceDB.get_character(node.character) if "character" in node else ResourceDB.get_narrator()
 		
 		if "background" in node:
 			var bg: Background = ResourceDB.get_background(node.background)
 			_background.texture = bg.texture
 
-		# Normal text reply.
-		if "line" in node:
-			var character: Character = ResourceDB.get_character(node.character) if "character" in node else ResourceDB.get_narrator()
+		# Displaying a character.
+		if "character" in node:
 			var side: String = node.side if "side" in node else CharacterDisplayer.SIDE.LEFT
 			var animation: String = node.get("animation", "")
 			var expression: String = node.get("expression", "")
-
-			_text_box.display(node.line, character.display_name)
 			_character_displayer.display(character, side, expression, animation)
+			if not "line" in node:
+				yield(_character_displayer, "display_finished")
+
+		# Normal text reply.
+		if "line" in node:
+			_text_box.display(node.line, character.display_name)
 			yield(_text_box, "next_requested")
-			# If the player presses enter before the animations ended, we seek to the end.
-			_character_displayer.foward_animations_to_end()
 			key = node.next
 
 		# Transition animation.
@@ -63,6 +65,10 @@ func run_scene() -> void:
 			key = next_node_key
 			if key == -1:
 				emit_signal("restart_requested")
+		
+		# Ensures we don't get stuck in an infinite loop if there's no line to display.
+		else:
+			key = node.next
 
 	_character_displayer.hide()
 	emit_signal("scene_finished")

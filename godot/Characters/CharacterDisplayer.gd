@@ -3,6 +3,9 @@
 class_name CharacterDisplayer
 extends Node
 
+## Emitted when the characters finished displaying or finished their animation.
+signal display_finished
+
 ## Maps animation text ids to a function that animates a character sprite.
 const ANIMATIONS := {"enter": "_enter", "leave": "_leave"}
 const SIDE := {LEFT = "left", RIGHT = "right"}
@@ -19,6 +22,13 @@ onready var _right_sprite: Sprite = $Right
 func _ready() -> void:
 	_left_sprite.hide()
 	_right_sprite.hide()
+	_tween.connect("tween_all_completed", self, "_on_Tween_tween_all_completed")
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	# If the player presses enter before the character animations ended, we seek to the end.
+	if event.is_action_pressed("ui_accept") and _tween.is_active():
+		_tween.seek(INF)
 
 
 func display(character: Character, side: String = SIDE.LEFT, expression := "", animation := "") -> void:
@@ -43,10 +53,6 @@ func display(character: Character, side: String = SIDE.LEFT, expression := "", a
 		call(ANIMATIONS[animation], side, sprite)
 
 	sprite.show()
-
-
-func foward_animations_to_end() -> void:
-	_tween.seek(INF)
 
 
 ## Fades in and moves the character to the anchor position.
@@ -86,3 +92,7 @@ func _leave(from_side: String, sprite: Sprite) -> void:
 	)
 	_tween.start()
 	_tween.seek(0.0)
+
+
+func _on_Tween_tween_all_completed() -> void:
+	emit_signal("display_finished")

@@ -3,7 +3,8 @@ extends Node
 const ScenePlayer := preload("res://ScenePlayer.tscn")
 
 const SCENES := [
-	"res://Scenes/1.scene"
+	"res://Scenes/1.scene",
+	"res://Scenes/2.scene"
 ]
 
 var _current_index := -1

@@ -1,0 +1,39 @@
+{
+0: {
+"background": "steppes",
+"transition": "fade_in",
+"next": 1
+},
+1: {
+"character": "sophia",
+"side": "left",
+"animation": "enter",
+"next": 2
+},
+2: {
+"character": "dani",
+"side": "right",
+"animation": "enter",
+"next": 3
+},
+3: {
+"character": "dani",
+"line": "Wait, where are we, exactly?",
+"next": 4
+},
+4: {
+"character": "sophia",
+"line": "It doesn't make any sense, right?
+Don't worry about it, the developer just needed a second scene to test the demo.",
+"next": 5
+},
+5: {
+"character": "dani",
+"line": "He could've told us! I [b]hate[/b] when they do that.",
+"next": 6
+},
+6: {
+"transition": "fade_out",
+"next": -1
+}
+}
