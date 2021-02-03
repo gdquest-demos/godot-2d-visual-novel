@@ -16,7 +16,7 @@ export var bbcode_text := "" setget set_bbcode_text
 onready var _name_label: Label = $NameBackground/NameLabel
 onready var _rich_text_label: RichTextLabel = $RichTextLabel
 onready var _tween: Tween = $Tween
-onready var _blinking_arrow: Control = $BlinkingArrow
+onready var _blinking_arrow: Control = $RichTextLabel/BlinkingArrow
 onready var _anim_player: AnimationPlayer = $FadeAnimationPlayer
 
 
