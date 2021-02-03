@@ -7,9 +7,6 @@ signal display_finished
 signal next_requested
 signal choice_made(target_id)
 
-const ChoiceSelector := preload("res://ChoiceSelector.tscn")
-const COLOR_WHITE_TRANSPARENT := Color(1.0, 1.0, 1.0, 0.0)
-
 ## Speed at which the characters appear in the text body in characters per second.
 export var display_speed := 20.0
 export var bbcode_text := "" setget set_bbcode_text
@@ -17,21 +14,25 @@ export var bbcode_text := "" setget set_bbcode_text
 onready var _name_label: Label = $NameBackground/NameLabel
 onready var _name_background: TextureRect = $NameBackground
 onready var _rich_text_label: RichTextLabel = $RichTextLabel
+onready var _choice_selector: ChoiceSelector = $ChoiceSelector
+
 onready var _tween: Tween = $Tween
 onready var _blinking_arrow: Control = $RichTextLabel/BlinkingArrow
+
 onready var _anim_player: AnimationPlayer = $FadeAnimationPlayer
 
 
 func _ready() -> void:
 	visible = false
-	_name_label.text = ""
-	_name_label.modulate = COLOR_WHITE_TRANSPARENT
 
 	_blinking_arrow.hide()
 
 	_rich_text_label.bbcode_text = ""
 	_rich_text_label.visible_characters = 0
+
 	_tween.connect("tween_all_completed", self, "_on_Tween_tween_all_completed")
+	_choice_selector.connect("choice_made", self, "_on_ChoiceSelector_choice_made")
+
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -47,8 +48,7 @@ func display(text: String, character_name := "", speed := display_speed) -> void
 
 	if character_name != "":
 		if _name_label.text == "":
-			_tween.interpolate_property(_name_label, "modulate", COLOR_WHITE_TRANSPARENT, Color.white, 0.4)
-			_tween.start()
+			_name_label.appear()
 
 		_name_label.text = character_name
 
@@ -57,14 +57,11 @@ func display(text: String, character_name := "", speed := display_speed) -> void
 
 
 func display_choice(choices: Array) -> void:
-	_name_background.hide()
+	_name_background.disappear()
 	_rich_text_label.hide()
 	_blinking_arrow.hide()
 
-	var choice_selector: ChoiceSelector = ChoiceSelector.instance()
-	add_child(choice_selector)
-	choice_selector.setup(choices)
-	choice_selector.connect("choice_made", self, "_on_ChoiceSelector_choice_made")
+	_choice_selector.display(choices)
 
 
 func set_bbcode_text(text: String) -> void:
@@ -108,5 +105,5 @@ func _on_Tween_tween_all_completed() -> void:
 
 func _on_ChoiceSelector_choice_made(target_id: int) -> void:
 	emit_signal("choice_made", target_id)
-	_name_label.show()
+	_name_background.appear()
 	_rich_text_label.show()

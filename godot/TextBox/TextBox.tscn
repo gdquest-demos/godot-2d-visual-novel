@@ -1,10 +1,13 @@
-[gd_scene load_steps=9 format=2]
+[gd_scene load_steps=12 format=2]
 
 [ext_resource path="res://TextBox/TextBox.gd" type="Script" id=1]
 [ext_resource path="res://TextBox/BlinkingArrow.tscn" type="PackedScene" id=2]
+[ext_resource path="res://ChoiceSelector.tscn" type="PackedScene" id=3]
 [ext_resource path="res://Fonts/theme.tres" type="Theme" id=4]
 [ext_resource path="res://TextBox/text-box.png" type="Texture" id=5]
 [ext_resource path="res://TextBox/character-name-box.png" type="Texture" id=6]
+[ext_resource path="res://TextBox/NameLabel.gd" type="Script" id=7]
+[ext_resource path="res://TextBox/NameBackground.gd" type="Script" id=8]
 
 [sub_resource type="Animation" id=1]
 resource_name = "fade_in"
@@ -168,6 +171,7 @@ margin_top = -45.1899
 margin_right = 582.0
 margin_bottom = 65.8101
 texture = ExtResource( 6 )
+script = ExtResource( 8 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -184,9 +188,14 @@ margin_bottom = 29.5
 text = "Sophia"
 align = 1
 valign = 1
+script = ExtResource( 7 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="Tween" type="Tween" parent="NameBackground/NameLabel"]
+
+[node name="Tween" type="Tween" parent="NameBackground"]
 
 [node name="RichTextLabel" type="RichTextLabel" parent="."]
 anchor_left = 0.5
@@ -215,6 +224,10 @@ margin_left = 17.0
 margin_top = 1.0
 margin_right = 17.0
 margin_bottom = 1.0
+
+[node name="ChoiceSelector" parent="." instance=ExtResource( 3 )]
+margin_left = 657.0
+margin_right = -658.0
 
 [node name="Tween" type="Tween" parent="."]
 

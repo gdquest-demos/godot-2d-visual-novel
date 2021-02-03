@@ -4,7 +4,7 @@ extends VBoxContainer
 signal choice_made(target_id)
 
 
-func setup(choices: Array) -> void:
+func display(choices: Array) -> void:
 	for choice in choices:
 		var button := Button.new()
 		button.text = choice.label
@@ -13,6 +13,11 @@ func setup(choices: Array) -> void:
 	(get_child(0) as Button).grab_focus()
 
 
+func _clear() -> void:
+	for child in get_children():
+		queue_free()
+
+
 func _on_Button_pressed(target_id: int) -> void:
 	emit_signal("choice_made", target_id)
-	queue_free()
+	_clear()
