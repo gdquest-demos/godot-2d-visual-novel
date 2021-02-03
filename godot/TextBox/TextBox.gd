@@ -13,7 +13,7 @@ const ChoiceSelector := preload("res://ChoiceSelector.tscn")
 export var display_speed := 20.0
 export var bbcode_text := "" setget set_bbcode_text
 
-onready var _name_label: Label = $NameLabel
+onready var _name_label: Label = $NameBackground/NameLabel
 onready var _rich_text_label: RichTextLabel = $RichTextLabel
 onready var _tween: Tween = $Tween
 onready var _blinking_arrow: Control = $BlinkingArrow
@@ -24,6 +24,7 @@ func _ready() -> void:
 	_name_label.text = ""
 	_rich_text_label.bbcode_text = ""
 	_rich_text_label.visible_characters = 0
+	_tween.connect("tween_all_completed", self, "_on_Tween_tween_all_completed")
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -86,7 +87,6 @@ func fade_in_async() -> void:
 func fade_out_async() -> void:
 	_anim_player.play("fade_out")
 	yield(_anim_player, "animation_finished")
-
 
 
 func _on_Tween_tween_all_completed() -> void:

@@ -2,9 +2,9 @@
 
 [sub_resource type="Animation" id=1]
 resource_name = "fade_in"
-length = 0.7
+length = 1.1
 tracks/0/type = "value"
-tracks/0/path = NodePath(".:modulate")
+tracks/0/path = NodePath(".:self_modulate")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/imported = false

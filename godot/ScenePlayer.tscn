@@ -1,6 +1,6 @@
 [gd_scene load_steps=7 format=2]
 
-[ext_resource path="res://TextBox.tscn" type="PackedScene" id=1]
+[ext_resource path="res://TextBox/TextBox.tscn" type="PackedScene" id=1]
 [ext_resource path="res://ScenePlayer.gd" type="Script" id=2]
 [ext_resource path="res://Characters/CharacterDisplayer.tscn" type="PackedScene" id=3]
 [ext_resource path="res://industrial-building.jpg" type="Texture" id=4]
@@ -8,7 +8,6 @@
 [ext_resource path="res://Fonts/theme.tres" type="Theme" id=6]
 
 [node name="ScenePlayer" type="Control"]
-modulate = Color( 1, 1, 1, 0 )
 anchor_right = 1.0
 anchor_bottom = 1.0
 theme = ExtResource( 6 )
@@ -29,6 +28,5 @@ __meta__ = {
 [node name="CharacterDisplayer" parent="." instance=ExtResource( 3 )]
 
 [node name="TextBox" parent="." instance=ExtResource( 1 )]
-modulate = Color( 1, 1, 1, 0 )
 
 [node name="FadeAnimationPlayer" parent="." instance=ExtResource( 5 )]

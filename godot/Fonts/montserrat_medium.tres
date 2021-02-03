@@ -3,5 +3,5 @@
 [ext_resource path="res://Fonts/montserrat_medium.ttf" type="DynamicFontData" id=1]
 
 [resource]
-size = 20
+size = 32
 font_data = ExtResource( 1 )
