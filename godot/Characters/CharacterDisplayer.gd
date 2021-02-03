@@ -17,7 +17,7 @@ func _ready() -> void:
 
 func display(character_id: String, side := Side.LEFT, expression := "", animation := "") -> void:
 	var sprite: Sprite = _left_sprite if side == Side.LEFT else _right_sprite
-	var character: Character = CharactersDB.get_character(character_id)
+	var character: Character = ResourceDB.get_character(character_id)
 
 	sprite.texture = character.get_image(expression)
 

@@ -10,6 +10,11 @@ config_version=4
 
 _global_script_classes=[ {
 "base": "Resource",
+"class": "Background",
+"language": "GDScript",
+"path": "res://Backgrounds/Background.gd"
+}, {
+"base": "Resource",
 "class": "Character",
 "language": "GDScript",
 "path": "res://Characters/Character.gd"
@@ -35,6 +40,7 @@ _global_script_classes=[ {
 "path": "res://ScenePlayer.gd"
 } ]
 _global_script_class_icons={
+"Background": "",
 "Character": "",
 "CharacterDisplayer": "",
 "CharacterLoader": "",
@@ -50,7 +56,7 @@ config/icon="res://icon.png"
 
 [autoload]
 
-CharactersDB="*res://Characters/CharactersDB.gd"
+ResourceDB="*res://Autoloads/ResourceDB.gd"
 
 [debug]
 

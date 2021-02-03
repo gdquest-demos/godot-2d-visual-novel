@@ -30,12 +30,15 @@ func run_scene() -> void:
 	var key = _scene_data.keys()[0]
 	while key != -1:
 		var node: Dictionary = _scene_data[key]
+		
+		if "background" in node:
+			$Background.texture
 
 		# Normal text reply.
 		if "line" in node:
 			var character: Character
 			if node.has("character"):
-				character = CharactersDB.get_character(node.character)
+				character = ResourceDB.get_character(node.character)
 
 			_text_box.display(node.line, character.display_name)
 			_character_displayer.display(node.character)
