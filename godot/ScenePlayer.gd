@@ -3,6 +3,7 @@ class_name ScenePlayer
 extends Node
 
 signal scene_finished
+signal restart_requested
 signal transition_finished
 
 var _scene_data := {}
@@ -37,10 +38,7 @@ func run_scene() -> void:
 
 		# Normal text reply.
 		if "line" in node:
-			var character: Character
-			if "character" in node:
-				character = ResourceDB.get_character(node.character)
-
+			var character: Character = ResourceDB.get_character(node.character) if "character" in node else ResourceDB.get_narrator()
 			var side: String = node.side if "side" in node else CharacterDisplayer.SIDE.LEFT
 			var animation: String = node.get("animation", "")
 			var expression: String = node.get("expression", "")
@@ -48,6 +46,8 @@ func run_scene() -> void:
 			_text_box.display(node.line, character.display_name)
 			_character_displayer.display(character, side, expression, animation)
 			yield(_text_box, "next_requested")
+			# If the player presses enter before the animations ended, we seek to the end.
+			_character_displayer.foward_animations_to_end()
 			key = node.next
 
 		# Transition animation.
@@ -61,6 +61,8 @@ func run_scene() -> void:
 			_text_box.display_choice(node.choices)
 			var next_node_key = yield(_text_box, "choice_made")
 			key = next_node_key
+			if key == -1:
+				emit_signal("restart_requested")
 
 	_character_displayer.hide()
 	emit_signal("scene_finished")

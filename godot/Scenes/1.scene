@@ -21,7 +21,7 @@
 3: {
 "choices": [ {
 "label": "Start over",
-"target": 1
+"target": -1
 }, {
 "label": "Continue",
 "target": 4
@@ -42,6 +42,10 @@
 "next": 6
 },
 6: {
+"line": "And thus started Sophia and Dani's journey.",
+"next": 7
+},
+7: {
 "next": -1,
 "transition": "fade_out"
 }

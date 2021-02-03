@@ -15,7 +15,7 @@ func display(choices: Array) -> void:
 
 func _clear() -> void:
 	for child in get_children():
-		queue_free()
+		child.queue_free()
 
 
 func _on_Button_pressed(target_id: int) -> void:

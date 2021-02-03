@@ -22,6 +22,10 @@ func _ready() -> void:
 
 
 func display(character: Character, side: String = SIDE.LEFT, expression := "", animation := "") -> void:
+	# Prevents overriding displayed sprites if showing a line from the narrator.
+	if character == ResourceDB.get_narrator():
+		return
+
 	assert(side in SIDE.values())
 
 	# Keeps track of a character that's already displayed on a given side
@@ -39,6 +43,10 @@ func display(character: Character, side: String = SIDE.LEFT, expression := "", a
 		call(ANIMATIONS[animation], side, sprite)
 
 	sprite.show()
+
+
+func foward_animations_to_end() -> void:
+	_tween.seek(INF)
 
 
 ## Fades in and moves the character to the anchor position.
