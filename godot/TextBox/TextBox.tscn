@@ -184,6 +184,9 @@ margin_bottom = 29.5
 text = "Sophia"
 align = 1
 valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="RichTextLabel" type="RichTextLabel" parent="."]
 anchor_left = 0.5
