@@ -2,12 +2,14 @@
 
 [ext_resource path="res://TextBox/TextBox.gd" type="Script" id=1]
 [ext_resource path="res://TextBox/BlinkingArrow.tscn" type="PackedScene" id=2]
-[ext_resource path="res://ChoiceSelector.tscn" type="PackedScene" id=3]
-[ext_resource path="res://Fonts/theme.tres" type="Theme" id=4]
+[ext_resource path="res://TextBox/ChoiceSelector.tscn" type="PackedScene" id=3]
+[ext_resource path="res://Theme/theme.tres" type="Theme" id=4]
 [ext_resource path="res://TextBox/text-box.png" type="Texture" id=5]
 [ext_resource path="res://TextBox/character-name-box.png" type="Texture" id=6]
 [ext_resource path="res://TextBox/NameLabel.gd" type="Script" id=7]
 [ext_resource path="res://TextBox/NameBackground.gd" type="Script" id=8]
+
+
 
 [sub_resource type="Animation" id=1]
 resource_name = "fade_in"

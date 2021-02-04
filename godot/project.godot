@@ -32,7 +32,7 @@ _global_script_classes=[ {
 "base": "VBoxContainer",
 "class": "ChoiceSelector",
 "language": "GDScript",
-"path": "res://ChoiceSelector.gd"
+"path": "res://TextBox/ChoiceSelector.gd"
 }, {
 "base": "Node",
 "class": "ScenePlayer",
