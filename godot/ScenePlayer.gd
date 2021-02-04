@@ -19,13 +19,6 @@ onready var _character_displayer := $CharacterDisplayer
 onready var _anim_player: AnimationPlayer = $FadeAnimationPlayer
 onready var _background := $Background
 
-# func _ready() -> void:
-# 	_text_box.hide()
-#	var file := File.new()
-#	file.open("res://Scenes/1.scene", File.WRITE)
-#	file.store_string(var2str(_scene_data))
-#	file.close()
-
 
 func run_scene() -> void:
 	var key = _scene_data.keys()[0]
@@ -95,3 +88,11 @@ func _disappear_async() -> void:
 	yield(_anim_player, "animation_finished")
 	_text_box.hide()
 	emit_signal("transition_finished")
+
+
+## Saves a dictionary representing a scene to the disk using `var2str`.
+func _store_scene_data(data: Dictionary, path: String) -> void:
+	var file := File.new()
+	file.open(path, File.WRITE)
+	file.store_string(var2str(_scene_data))
+	file.close()
