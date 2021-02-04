@@ -24,8 +24,12 @@ func run_scene() -> void:
 	var key = _scene_data.keys()[0]
 	while key != -1:
 		var node: Dictionary = _scene_data[key]
-		var character: Character = ResourceDB.get_character(node.character) if "character" in node else ResourceDB.get_narrator()
-		
+		var character: Character = (
+			ResourceDB.get_character(node.character)
+			if "character" in node
+			else ResourceDB.get_narrator()
+		)
+
 		if "background" in node:
 			var bg: Background = ResourceDB.get_background(node.background)
 			_background.texture = bg.texture
@@ -58,7 +62,7 @@ func run_scene() -> void:
 			key = next_node_key
 			if key == -1:
 				emit_signal("restart_requested")
-		
+
 		# Ensures we don't get stuck in an infinite loop if there's no line to display.
 		else:
 			key = node.next

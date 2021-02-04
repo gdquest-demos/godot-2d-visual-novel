@@ -34,7 +34,6 @@ func _ready() -> void:
 	_choice_selector.connect("choice_made", self, "_on_ChoiceSelector_choice_made")
 
 
-
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_accept"):
 		if _blinking_arrow.visible:
@@ -45,7 +44,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func display(text: String, character_name := "", speed := display_speed) -> void:
 	set_bbcode_text(text)
-	
+
 	if speed != display_speed:
 		display_speed = speed
 
@@ -57,7 +56,6 @@ func display(text: String, character_name := "", speed := display_speed) -> void
 			_name_label.appear()
 
 		_name_label.text = character_name
-
 
 
 func display_choice(choices: Array) -> void:

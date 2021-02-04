@@ -12,12 +12,16 @@ func _ready() -> void:
 
 
 func appear() -> void:
-	_tween.interpolate_property(self, "modulate", COLOR_WHITE_TRANSPARENT, Color.white, appear_duration)
+	_tween.interpolate_property(
+		self, "modulate", COLOR_WHITE_TRANSPARENT, Color.white, appear_duration
+	)
 	_tween.start()
 	_tween.seek(0)
 
 
 func disappear() -> void:
-	_tween.interpolate_property(self, "modulate", Color.white, COLOR_WHITE_TRANSPARENT, appear_duration / 2.0)
+	_tween.interpolate_property(
+		self, "modulate", Color.white, COLOR_WHITE_TRANSPARENT, appear_duration / 2.0
+	)
 	_tween.start()
 	_tween.seek(0)
