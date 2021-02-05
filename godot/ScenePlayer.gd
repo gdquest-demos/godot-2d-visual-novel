@@ -62,6 +62,7 @@ func run_scene() -> void:
 			key = next_node_key
 			if key == -1:
 				emit_signal("restart_requested")
+				return
 
 		# Ensures we don't get stuck in an infinite loop if there's no line to display.
 		else:
