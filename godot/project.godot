@@ -24,11 +24,6 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://Characters/CharacterDisplayer.gd"
 }, {
-"base": "Reference",
-"class": "CharacterLoader",
-"language": "GDScript",
-"path": "res://Characters/CharacterLoader.gd"
-}, {
 "base": "VBoxContainer",
 "class": "ChoiceSelector",
 "language": "GDScript",
@@ -43,7 +38,6 @@ _global_script_class_icons={
 "Background": "",
 "Character": "",
 "CharacterDisplayer": "",
-"CharacterLoader": "",
 "ChoiceSelector": "",
 "ScenePlayer": ""
 }

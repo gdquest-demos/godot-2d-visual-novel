@@ -2,7 +2,6 @@
 
 [ext_resource path="res://Theme/montserrat_extrabold.tres" type="DynamicFont" id=1]
 
-
 [sub_resource type="StyleBoxTexture" id=1]
 
 [sub_resource type="StyleBoxFlat" id=2]
