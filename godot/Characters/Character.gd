@@ -24,7 +24,7 @@ func get_default_image() -> Texture:
 
 
 func get_image(expression: String) -> Texture:
-	return images[expression] if expression in images else get_default_image()
+	return images.get(expression, get_default_image())
 
 
 func set_age(value: int) -> void:

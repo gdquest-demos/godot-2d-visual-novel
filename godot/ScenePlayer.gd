@@ -6,6 +6,8 @@ signal scene_finished
 signal restart_requested
 signal transition_finished
 
+const KEY_END_OF_SCENE := -1
+
 var _scene_data := {}
 
 ## Maps transition keys to a corresponding function to call.
@@ -22,7 +24,7 @@ onready var _background := $Background
 
 func run_scene() -> void:
 	var key = _scene_data.keys()[0]
-	while key != -1:
+	while key != KEY_END_OF_SCENE:
 		var node: Dictionary = _scene_data[key]
 		var character: Character = (
 			ResourceDB.get_character(node.character)
@@ -60,7 +62,7 @@ func run_scene() -> void:
 			_text_box.display_choice(node.choices)
 			var next_node_key = yield(_text_box, "choice_made")
 			key = next_node_key
-			if key == -1:
+			if key == KEY_END_OF_SCENE:
 				emit_signal("restart_requested")
 				return
 
