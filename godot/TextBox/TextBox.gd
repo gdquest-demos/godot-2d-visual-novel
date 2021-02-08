@@ -38,7 +38,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		if _blinking_arrow.visible:
 			emit_signal("next_requested")
 		else:
-			_display_all_content()
+			_tween.seek(INF)
 
 
 func display(text: String, character_name := "", speed := display_speed) -> void:
@@ -82,10 +82,6 @@ func _begin_dialogue_display() -> void:
 		_rich_text_label, "visible_characters", 0, character_count, character_count / display_speed
 	)
 	_tween.start()
-
-
-func _display_all_content() -> void:
-	_tween.seek(10000)
 
 
 func fade_in_async() -> void:
