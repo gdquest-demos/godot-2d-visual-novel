@@ -26,6 +26,7 @@ func _ready() -> void:
 	hide()
 	_blinking_arrow.hide()
 
+	_name_label.text = ""
 	_rich_text_label.bbcode_text = ""
 	_rich_text_label.visible_characters = 0
 
