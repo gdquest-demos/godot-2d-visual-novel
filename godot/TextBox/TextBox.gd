@@ -23,8 +23,7 @@ onready var _anim_player: AnimationPlayer = $FadeAnimationPlayer
 
 
 func _ready() -> void:
-	visible = false
-
+	hide()
 	_blinking_arrow.hide()
 
 	_rich_text_label.bbcode_text = ""
@@ -102,7 +101,7 @@ func fade_out_async() -> void:
 
 func _on_Tween_tween_all_completed() -> void:
 	emit_signal("display_finished")
-	_blinking_arrow.visible = true
+	_blinking_arrow.show()
 
 
 func _on_ChoiceSelector_choice_made(target_id: int) -> void:
