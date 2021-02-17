@@ -60,8 +60,7 @@ func run_scene() -> void:
 		# Choices.
 		elif "choices" in node:
 			_text_box.display_choice(node.choices)
-			var next_node_key = yield(_text_box, "choice_made")
-			key = next_node_key
+			key = yield(_text_box, "choice_made")
 
 		# Ensures we don't get stuck in an infinite loop if there's no line to display.
 		else:
