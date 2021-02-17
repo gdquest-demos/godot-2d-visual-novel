@@ -61,14 +61,14 @@ func run_scene() -> void:
 		elif "choices" in node:
 			_text_box.display_choice(node.choices)
 			key = yield(_text_box, "choice_made")
+			if key == KEY_END_OF_SCENE:
+				emit_signal("restart_requested")
+				return
 
 		# Ensures we don't get stuck in an infinite loop if there's no line to display.
 		else:
 			key = node.next
 
-		if key == KEY_END_OF_SCENE:
-			emit_signal("restart_requested")
-			return
 
 	_character_displayer.hide()
 	emit_signal("scene_finished")
