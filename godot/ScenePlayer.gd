@@ -84,7 +84,6 @@ func load_scene(file_path: String) -> void:
 func _appear_async() -> void:
 	_anim_player.play("fade_in")
 	yield(_anim_player, "animation_finished")
-	_text_box.show()
 	yield(_text_box.fade_in_async(), "completed")
 	emit_signal("transition_finished")
 
@@ -93,7 +92,6 @@ func _disappear_async() -> void:
 	yield(_text_box.fade_out_async(), "completed")
 	_anim_player.play("fade_out")
 	yield(_anim_player, "animation_finished")
-	_text_box.hide()
 	emit_signal("transition_finished")
 
 
