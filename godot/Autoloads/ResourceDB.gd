@@ -3,8 +3,8 @@ extends Node
 
 var _narrator_id := "narrator"
 
-onready var _characters := _load_characters("res://Characters/")
-onready var _backgrounds := _load_backgrounds("res://Backgrounds/")
+onready var _characters := _load_resources("res://Characters/", "_is_character")
+onready var _backgrounds := _load_resources("res://Backgrounds/", "_is_background")
 
 
 func get_character(character_id: String) -> Character:
@@ -17,16 +17,6 @@ func get_narrator() -> Character:
 
 func get_background(background_id: String) -> Background:
 	return _backgrounds.get(background_id)
-
-
-func _load_characters(directory_path: String) -> Dictionary:
-	return _load_resources(directory_path, "_is_character")
-
-
-## Finds and loads [Background] resources in the directory corresponding to `directory_path` and
-## returns them as a dictionary with the form {id: background}, where `id` is a text string.
-func _load_backgrounds(directory_path: String) -> Dictionary:
-	return _load_resources(directory_path, "_is_background")
 
 
 ## Finds and loads resources of a given type in `directory_path`.
