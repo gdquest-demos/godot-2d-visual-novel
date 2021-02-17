@@ -1,7 +1,7 @@
 ## Auto-loaded node that loads and gives access to all [Background] resources in the game.
 extends Node
 
-var _narrator_id := "narrator"
+const NARRATOR_ID := "narrator"
 
 onready var _characters := _load_resources("res://Characters/", "_is_character")
 onready var _backgrounds := _load_resources("res://Backgrounds/", "_is_background")
@@ -12,7 +12,7 @@ func get_character(character_id: String) -> Character:
 
 
 func get_narrator() -> Character:
-	return _characters.get(_narrator_id)
+	return _characters.get(NARRATOR_ID)
 
 
 func get_background(background_id: String) -> Background:
