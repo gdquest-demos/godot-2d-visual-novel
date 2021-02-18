@@ -21,7 +21,7 @@
 3: {
 "choices": [ {
 "label": "Start over",
-"target": -1
+"target": -2
 }, {
 "label": "Continue",
 "target": 4

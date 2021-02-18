@@ -7,6 +7,7 @@ signal restart_requested
 signal transition_finished
 
 const KEY_END_OF_SCENE := -1
+const KEY_RESTART_SCENE := -2
 
 var _scene_data := {}
 
@@ -61,7 +62,7 @@ func run_scene() -> void:
 		elif "choices" in node:
 			_text_box.display_choice(node.choices)
 			key = yield(_text_box, "choice_made")
-			if key == KEY_END_OF_SCENE:
+			if key == KEY_RESTART_SCENE:
 				emit_signal("restart_requested")
 				return
 
