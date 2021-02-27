@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=2]
+[gd_scene load_steps=13 format=2]
 
 [ext_resource path="res://TextBox/TextBox.gd" type="Script" id=1]
 [ext_resource path="res://TextBox/BlinkingArrow.tscn" type="PackedScene" id=2]
@@ -8,6 +8,7 @@
 [ext_resource path="res://TextBox/character-name-box.png" type="Texture" id=6]
 [ext_resource path="res://TextBox/NameLabel.gd" type="Script" id=7]
 [ext_resource path="res://TextBox/NameBackground.gd" type="Script" id=8]
+[ext_resource path="res://TextBox/SkipButton.tscn" type="PackedScene" id=9]
 
 [sub_resource type="Animation" id=1]
 resource_name = "fade_in"
@@ -85,18 +86,6 @@ tracks/5/keys = {
 "update": 0,
 "values": [ Color( 1, 1, 1, 0 ), Color( 1, 1, 1, 0 ), Color( 1, 1, 1, 1 ), Color( 1, 1, 1, 1 ) ]
 }
-tracks/6/type = "value"
-tracks/6/path = NodePath("Controls:modulate")
-tracks/6/interp = 1
-tracks/6/loop_wrap = true
-tracks/6/imported = false
-tracks/6/enabled = true
-tracks/6/keys = {
-"times": PoolRealArray( 0, 0.132, 0.301612, 0.5 ),
-"transitions": PoolRealArray( 1, 1, 1, 1 ),
-"update": 0,
-"values": [ Color( 1, 1, 1, 0 ), Color( 1, 1, 1, 0 ), Color( 1, 1, 1, 1 ), Color( 1, 1, 1, 1 ) ]
-}
 
 [sub_resource type="Animation" id=2]
 resource_name = "fade_out"
@@ -134,18 +123,6 @@ tracks/2/imported = false
 tracks/2/enabled = true
 tracks/2/keys = {
 "times": PoolRealArray( 0, 0.133333, 0.266667 ),
-"transitions": PoolRealArray( 1, 1, 1 ),
-"update": 0,
-"values": [ Color( 1, 1, 1, 1 ), Color( 1, 1, 1, 1 ), Color( 1, 1, 1, 0 ) ]
-}
-tracks/3/type = "value"
-tracks/3/path = NodePath("Controls:modulate")
-tracks/3/interp = 1
-tracks/3/loop_wrap = true
-tracks/3/imported = false
-tracks/3/enabled = true
-tracks/3/keys = {
-"times": PoolRealArray( 0, 0.132, 0.268054 ),
 "transitions": PoolRealArray( 1, 1, 1 ),
 "update": 0,
 "values": [ Color( 1, 1, 1, 1 ), Color( 1, 1, 1, 1 ), Color( 1, 1, 1, 0 ) ]
@@ -228,28 +205,9 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Controls" type="HBoxContainer" parent="."]
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-margin_left = 500.0
-margin_top = -60.0
-margin_right = -500.0
-mouse_filter = 2
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="SkipButton" type="Button" parent="Controls"]
-self_modulate = Color( 0.678431, 0.678431, 0.678431, 0.67451 )
-margin_right = 108.0
-margin_bottom = 60.0
-action_mode = 0
-keep_pressed_outside = true
-text = "SKIP"
-
-[node name="DelayTimer" type="Timer" parent="Controls/SkipButton"]
-wait_time = 0.1
+[node name="SkipButton" parent="." instance=ExtResource( 9 )]
+margin_left = -140.0
+margin_right = -32.0
 
 [node name="NameBackground" type="TextureRect" parent="."]
 margin_left = 94.0
