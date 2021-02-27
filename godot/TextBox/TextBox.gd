@@ -11,6 +11,10 @@ signal choice_made(target_id)
 export var display_speed := 20.0
 export var bbcode_text := "" setget set_bbcode_text
 
+onready var _controls : HBoxContainer = $Controls
+onready var _skip_button : Button = $Controls/SkipButton
+onready var _skip_button_delay_timer : Timer = $Controls/SkipButton/DelayTimer
+
 onready var _name_label: Label = $NameBackground/NameLabel
 onready var _name_background: TextureRect = $NameBackground
 onready var _rich_text_label: RichTextLabel = $RichTextLabel
@@ -33,13 +37,22 @@ func _ready() -> void:
 	_tween.connect("tween_all_completed", self, "_on_Tween_tween_all_completed")
 	_choice_selector.connect("choice_made", self, "_on_ChoiceSelector_choice_made")
 
+	_skip_button.connect("button_down", self, "_on_SkipButton_button_down")
+	_skip_button.connect("button_up", self, "_on_SkipButton_button_up")
+	_skip_button_delay_timer.connect("timeout", self, "_on_DelayTimer_timeout")
+
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_accept"):
-		if _blinking_arrow.visible:
-			emit_signal("next_requested")
-		else:
-			_tween.seek(INF)
+		advance_dialogue()
+
+
+# Either complete the current line or show the next dialogue line
+func advance_dialogue() -> void:
+	if _blinking_arrow.visible:
+		emit_signal("next_requested")
+	else:
+		_tween.seek(INF)
 
 
 func display(text: String, character_name := "", speed := display_speed) -> void:
@@ -59,6 +72,7 @@ func display(text: String, character_name := "", speed := display_speed) -> void
 
 
 func display_choice(choices: Array) -> void:
+	_controls.hide()
 	_name_background.disappear()
 	_rich_text_label.hide()
 	_blinking_arrow.hide()
@@ -103,5 +117,21 @@ func _on_Tween_tween_all_completed() -> void:
 
 func _on_ChoiceSelector_choice_made(target_id: int) -> void:
 	emit_signal("choice_made", target_id)
+	_controls.show()
 	_name_background.appear()
 	_rich_text_label.show()
+
+
+# Skip dialogue when the button is being held down
+func _on_SkipButton_button_down() -> void:
+	_skip_button_delay_timer.start()
+
+
+# Skip by using a quick loop with the DelayTimer
+func _on_DelayTimer_timeout() -> void:
+	advance_dialogue()
+
+
+# Stop skipping the dialogue
+func _on_SkipButton_button_up() -> void:
+	_skip_button_delay_timer.stop()
