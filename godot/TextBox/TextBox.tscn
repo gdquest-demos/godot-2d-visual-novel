@@ -9,8 +9,6 @@
 [ext_resource path="res://TextBox/NameLabel.gd" type="Script" id=7]
 [ext_resource path="res://TextBox/NameBackground.gd" type="Script" id=8]
 
-
-
 [sub_resource type="Animation" id=1]
 resource_name = "fade_in"
 length = 0.5
@@ -198,6 +196,7 @@ anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_top = -295.0
+mouse_filter = 2
 theme = ExtResource( 4 )
 texture = ExtResource( 5 )
 script = ExtResource( 1 )
@@ -210,6 +209,7 @@ margin_left = 94.0
 margin_top = -45.1899
 margin_right = 582.0
 margin_bottom = 65.8101
+mouse_filter = 2
 texture = ExtResource( 6 )
 script = ExtResource( 8 )
 __meta__ = {
@@ -246,6 +246,7 @@ margin_left = -689.0
 margin_top = -81.5
 margin_right = 690.0
 margin_bottom = 110.5
+mouse_filter = 2
 bbcode_enabled = true
 bbcode_text = "Text body"
 meta_underlined = false
@@ -264,10 +265,12 @@ margin_left = 17.0
 margin_top = 1.0
 margin_right = 17.0
 margin_bottom = 1.0
+mouse_filter = 1
 
 [node name="ChoiceSelector" parent="." instance=ExtResource( 3 )]
 margin_left = 657.0
 margin_right = -658.0
+mouse_filter = 2
 
 [node name="Tween" type="Tween" parent="."]
 
