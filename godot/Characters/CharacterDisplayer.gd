@@ -63,8 +63,11 @@ func _enter(from_side: String, sprite: Sprite) -> void:
 	)
 	_tween.interpolate_property(sprite, "modulate", COLOR_WHITE_TRANSPARENT, Color.white, 0.25)
 	_tween.start()
-	# Using Tween.seek() to set the sprite's position and modulate instantly.
-	_tween.seek(0.0)
+
+	# Set up the sprite
+	# We don't use Tween.seek(0.0) here since that could conflict with running tweens and make them jitter back and forth
+	sprite.position = start
+	sprite.modulate = COLOR_WHITE_TRANSPARENT
 
 
 func _leave(from_side: String, sprite: Sprite) -> void:
