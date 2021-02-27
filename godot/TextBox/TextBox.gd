@@ -11,6 +11,8 @@ signal choice_made(target_id)
 export var display_speed := 20.0
 export var bbcode_text := "" setget set_bbcode_text
 
+onready var _skip_button : Button = $SkipButton
+
 onready var _name_label: Label = $NameBackground/NameLabel
 onready var _name_background: TextureRect = $NameBackground
 onready var _rich_text_label: RichTextLabel = $RichTextLabel
@@ -33,13 +35,20 @@ func _ready() -> void:
 	_tween.connect("tween_all_completed", self, "_on_Tween_tween_all_completed")
 	_choice_selector.connect("choice_made", self, "_on_ChoiceSelector_choice_made")
 
+	_skip_button.connect("timer_ticked", self, "_on_SkipButton_timer_ticked")
+
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_accept"):
-		if _blinking_arrow.visible:
-			emit_signal("next_requested")
-		else:
-			_tween.seek(INF)
+		advance_dialogue()
+
+
+# Either complete the current line or show the next dialogue line
+func advance_dialogue() -> void:
+	if _blinking_arrow.visible:
+		emit_signal("next_requested")
+	else:
+		_tween.seek(INF)
 
 
 func display(text: String, character_name := "", speed := display_speed) -> void:
@@ -59,6 +68,7 @@ func display(text: String, character_name := "", speed := display_speed) -> void
 
 
 func display_choice(choices: Array) -> void:
+	_skip_button.hide()
 	_name_background.disappear()
 	_rich_text_label.hide()
 	_blinking_arrow.hide()
@@ -103,5 +113,10 @@ func _on_Tween_tween_all_completed() -> void:
 
 func _on_ChoiceSelector_choice_made(target_id: int) -> void:
 	emit_signal("choice_made", target_id)
+	_skip_button.show()
 	_name_background.appear()
 	_rich_text_label.show()
+
+
+func _on_SkipButton_timer_ticked() -> void:
+	advance_dialogue()
