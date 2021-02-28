@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=2]
+[gd_scene load_steps=12 format=2]
 
 [ext_resource path="res://TextBox/TextBox.gd" type="Script" id=1]
 [ext_resource path="res://TextBox/BlinkingArrow.tscn" type="PackedScene" id=2]
@@ -6,8 +6,7 @@
 [ext_resource path="res://Theme/theme.tres" type="Theme" id=4]
 [ext_resource path="res://TextBox/text-box.png" type="Texture" id=5]
 [ext_resource path="res://TextBox/character-name-box.png" type="Texture" id=6]
-[ext_resource path="res://TextBox/NameLabel.gd" type="Script" id=7]
-[ext_resource path="res://TextBox/NameBackground.gd" type="Script" id=8]
+[ext_resource path="res://TextBox/FadingControl.gd" type="Script" id=8]
 [ext_resource path="res://TextBox/SkipButton.tscn" type="PackedScene" id=9]
 
 [sub_resource type="Animation" id=1]
@@ -233,14 +232,11 @@ margin_bottom = 29.5
 text = "Sophia"
 align = 1
 valign = 1
-script = ExtResource( 7 )
+script = ExtResource( 8 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
-
-[node name="Tween" type="Tween" parent="NameBackground/NameLabel"]
-
-[node name="Tween" type="Tween" parent="NameBackground"]
+appear_duration = 0.4
 
 [node name="RichTextLabel" type="RichTextLabel" parent="."]
 anchor_left = 0.5

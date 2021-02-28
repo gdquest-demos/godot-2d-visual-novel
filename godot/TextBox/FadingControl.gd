@@ -1,13 +1,15 @@
-extends TextureRect
+## Uses a Tween object to animate the control node fading in and out.
+extends Control
 
 const COLOR_WHITE_TRANSPARENT := Color(1.0, 1.0, 1.0, 0.0)
 
 export var appear_duration := 0.3
 
-onready var _tween: Tween = $Tween
+var _tween := Tween.new()
 
 
 func _ready() -> void:
+	add_child(_tween)
 	modulate = COLOR_WHITE_TRANSPARENT
 
 
