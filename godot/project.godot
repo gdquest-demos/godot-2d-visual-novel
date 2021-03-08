@@ -29,6 +29,11 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://TextBox/ChoiceSelector.gd"
 }, {
+"base": "Reference",
+"class": "Lexer",
+"language": "GDScript",
+"path": "res://Parser/lexer.gd"
+}, {
 "base": "Node",
 "class": "ScenePlayer",
 "language": "GDScript",
@@ -39,6 +44,7 @@ _global_script_class_icons={
 "Character": "",
 "CharacterDisplayer": "",
 "ChoiceSelector": "",
+"Lexer": "",
 "ScenePlayer": ""
 }
 
