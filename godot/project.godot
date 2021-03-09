@@ -32,7 +32,7 @@ _global_script_classes=[ {
 "base": "Reference",
 "class": "Lexer",
 "language": "GDScript",
-"path": "res://Parser/lexer.gd"
+"path": "res://Parser/Lexer.gd"
 }, {
 "base": "Node",
 "class": "ScenePlayer",
