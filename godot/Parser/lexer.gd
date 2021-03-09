@@ -136,15 +136,15 @@ func tokenize(input: String) -> Array:
 				script.move_next()
 
 			if not script.peek() in [" ", "\n"]: # Not an empty line
-			  if line_indent_level > script.current_indent_level:
-				  push_error("Invalid indent level")
-			  elif line_indent_level == script.current_indent_level:
-				  pass
-			  else:
+				if line_indent_level > script.current_indent_level:
+					push_error("Invalid indent level")
+				elif line_indent_level == script.current_indent_level:
+					pass
+				else:
 				  # Emit token(s) indicating end of a block if the line's indent is lower than the currently tracked indent level
-				  for i in range(script.current_indent_level - line_indent_level):
-					  script.current_indent_level -= 1
-					  tokens.append(Token.new(TokenTypes.END_BLOCK, ""))
+					for i in range(script.current_indent_level - line_indent_level):
+						script.current_indent_level -= 1
+						tokens.append(Token.new(TokenTypes.END_BLOCK, ""))
 		elif character in BooleanOperators.values():
 			if character != BooleanOperators.NOT:
 				# Find the other matching character for || or &&
