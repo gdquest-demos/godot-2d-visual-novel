@@ -80,6 +80,20 @@ const FunctionKeywords := [
 	"set",
 ]
 
+const ConditionalStatementKeywords := [
+	"if",
+	"elif",
+	"else"
+]
+
+const BooleanOperatorKeywords := [
+	"and",
+	"or",
+	"not"
+]
+
+const ChoiceKeyword := "choice"
+
 const TokenTypes := {
 	SYMBOL = "Symbol",
 	FUNCTION = "Function",
@@ -92,14 +106,11 @@ const TokenTypes := {
 	END_BLOCK = "EndBlock",
 	NEWLINE = "Newline",
 	COMMENT = "Comment",
+	AND = "And",
+	OR = "Or",
+	NOT = "Not"
 }
 
-# Only one character for the OR and AND operators so we can match with the lexer's current character
-const BooleanOperators := {
-	NOT = "!",
-	AND = "&",
-	OR = "|"
-	}
 
 # Reads the text script, tokenizes it, then returns the tokens
 func read_script(path: String) -> Array:
@@ -126,10 +137,10 @@ func tokenize(input: String) -> Array:
 
 		if character == " ":
 			pass
-		elif character == "\n":  # Add the NEWLINE token and handle indentation
+		elif character == "\n":  # Add a NEWLINE token and handle indentation
 			tokens.append(Token.new(TokenTypes.NEWLINE, ""))
 
-			# Get the indentation level
+			# Get the indentation level for the current line
 			var line_indent_level := 0
 			while script.peek() == "\t":
 				line_indent_level += 1
@@ -145,15 +156,6 @@ func tokenize(input: String) -> Array:
 					for i in range(script.current_indent_level - line_indent_level):
 						script.current_indent_level -= 1
 						tokens.append(Token.new(TokenTypes.END_BLOCK, ""))
-		elif character in BooleanOperators.values():
-			if character != BooleanOperators.NOT:
-				# Find the other matching character for || or &&
-				if script.peek() == BooleanOperators.AND or script.peek() == BooleanOperators.OR:
-					character += script.move_next()
-				else:
-					push_error("Could not find matching character for one of the || or && boolean operators")
-
-			tokens.append(Token.new(character, ""))
 		elif character == "\"": # Handle string literals
 			tokens.append(tokenize_string_literal(script))
 		elif character == ":":  # Begin a nested block
@@ -217,10 +219,8 @@ func tokenize_symbol(script: DialogueScript) -> Token:
 
 	if symbol in FunctionKeywords:
 		return Token.new(TokenTypes.FUNCTION, symbol)
-	elif symbol in ["if", "elif", "else"]:
+	elif symbol in ConditionalStatementKeywords or symbol in BooleanOperatorKeywords or symbol == ChoiceKeyword:
 		return Token.new(TokenTypes[symbol.to_upper()], "")
-	elif symbol == "choice":
-		return Token.new(TokenTypes.CHOICE, "")
 	else:
 		return Token.new(TokenTypes.SYMBOL, symbol)
 
