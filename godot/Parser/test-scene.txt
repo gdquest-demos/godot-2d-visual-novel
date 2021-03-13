@@ -7,10 +7,7 @@ dani neutral enter right "Hey, I'm Dani."
 # Comment
 choice:
 	"Start over":
-		# Some empty lines below...
-
-
-		if not player_choice and another_player_choice:
+		if not player_choice:
 			"Starting over..."
 		else:
 			"choice unfulfilled"
@@ -28,10 +25,17 @@ mark next_jump_point
 if jumped_ahead:
 	background steppes
 	dani "Did you jump ahead?"
+	if not_jumped_ahead:
+		sophia "Guess I didn't"
+		if really_jumped_ahead:
+			sophia "I said I didn't!"
 	scene next_scene
 elif another_choice:
 	dani "I was about to say something..."
 	dani happy "But I forgot... Haha!"
+else: 
+	dani "I feel like we just experienced a major divergence in the timeline..."
+	dani "Or maybe I'm just over-thinking things again... Urgh..."
 
 "And thus started Sophia and Dani's journey."
 
