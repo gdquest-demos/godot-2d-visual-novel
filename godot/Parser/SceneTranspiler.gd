@@ -193,7 +193,7 @@ const COMMAND_KEYWORDS := {
 
 # Used to distinguish choice/if block's target number
 var unique_choice_id_modifier = 1000000000
-var unique_conditional_id_modifier = 2000000000
+var unique_conditional_id_modifier = 2100000000
 
 
 ## Takes in a syntax tree from the SceneParser and turns it into a
@@ -262,8 +262,8 @@ func transpile(syntax_tree: SceneParser.SyntaxTree, starting_index: int) -> Dial
 
 					dialogue_tree.append_node(SceneCommandNode.new(-1, new_scene))
 				COMMAND_KEYWORDS.PASS:
-					# Basically continue to the next node, this works since any choice/ifs are really just
-					# one node with despite all their child blocks
+					# pass doesn't work yet
+					# The logic for jumping out of code blocks is still really messy
 					dialogue_tree.append_node(PassCommandNode.new(dialogue_tree.index + 1))
 				COMMAND_KEYWORDS.JUMP:
 					# Jump to an existing jump point
@@ -418,32 +418,42 @@ func transpile(syntax_tree: SceneParser.SyntaxTree, starting_index: int) -> Dial
 						or dialogue_tree.values[node] is SceneCommandNode
 						)
 				):
-					# Modify the final node's next value to properly continue on after the choice is made
+					# Modify the final node's next value to properly continue on
 					dialogue_tree.values[node].next = original_value + 1
 				dialogue_tree.index += 1
 
 
-			# # Transpile the elif blocks
-			# if not expression.elif_block.empty():
-			# 	var elif_blocks := []
+			# Transpile the elif blocks
+			if not expression.elif_block.empty():
+				var elif_blocks := []
 
-			# 	for elif_block in expression.elif_block:
-			# 		var elif_subtree := SceneParser.SyntaxTree.new()
-			# 		elif_subtree.values = elif_block.block
+				for elif_block in expression.elif_block:
+					var elif_subtree := SceneParser.SyntaxTree.new()
+					elif_subtree.values = elif_block.block
 
-			# 		var elif_block_dialogue_tree: DialogueTree = transpile(
-			# 			elif_subtree, dialogue_tree.index
-			# 		)
+					var elif_block_dialogue_tree: DialogueTree = transpile(
+						elif_subtree, dialogue_tree.index
+					)
 
-			# 		elif_blocks.append(
-			# 			ConditionBlockNode.new(
-			# 				dialogue_tree.index + 1,
-			# 				elif_block.value[0].value,  # To be changed
-			# 				elif_block_dialogue_tree.values
-			# 			)
-			# 		)
+					# Store to pointer to the elif block
+					elif_blocks.append(ConditionBlockNode.new(dialogue_tree.index, elif_block.value.front()))
 
-			# 	node.elif_block = elif_blocks
+					# Add the elif block's tree's nodes to the main dialogue tree
+					for node in elif_block_dialogue_tree.values.keys():
+						dialogue_tree.values[node] = elif_block_dialogue_tree.values[node]
+						if (
+								node == elif_block_dialogue_tree.values.keys().back()
+								and not (
+									dialogue_tree.values[node] is JumpCommandNode
+									or dialogue_tree.values[node] is PassCommandNode
+									or dialogue_tree.values[node] is SceneCommandNode
+									)
+						):
+							# Modify the final node's next value to properly continue on
+							dialogue_tree.values[node].next = original_value + 1
+						dialogue_tree.index += 1
+
+				tree_node.elif_blocks = elif_blocks
 
 			# Transpile the else block
 			if expression.else_block != null:
@@ -468,9 +478,9 @@ func transpile(syntax_tree: SceneParser.SyntaxTree, starting_index: int) -> Dial
 							or dialogue_tree.values[node] is SceneCommandNode
 							)
 						):
-						# Modify the final node's next value to properly continue on after the choice is made
+						# Modify the final node's next value to properly continue on
 						dialogue_tree.values[node].next = original_value + 1
-						dialogue_tree.index += 1
+					dialogue_tree.index += 1
 
 
 			# Reset the index

@@ -4,7 +4,7 @@ background steppes fade_in
 
 sophia happy enter left "Why are we here again?"
 
-dani neutral enter right "Beats me"
+dani neutral enter right "Beats me."
 
 dani "Did you jump ahead in the last scene, Sophia?"
 
@@ -14,7 +14,11 @@ if jumped_ahead:
 	dani "..."
 	dani "Well, you learned your lesson."
 	dani "I won't dwell on it... Your next time doing this though... That may be a different story altogether..."
-else:
+elif started_over:	
+	dani "Or maybe you clicked \"Started over\"?"
+	dani "That can bug out some times..."
+	sophia "I think I did..."
+else:	
 	sophia "I swear on my mother's name that I did not jump ahead!"
 	sophia "How could you think I did that?"
 	dani "Oh..."

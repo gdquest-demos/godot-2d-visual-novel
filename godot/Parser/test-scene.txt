@@ -12,6 +12,8 @@ choice:
 	"Start over":
 		"Starting over already?"
 		
+		set started_over true
+	
 		jump jump_location
 	"Continue":
 		sophia "Well, let's continue." # Inline comment

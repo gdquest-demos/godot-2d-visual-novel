@@ -85,10 +85,23 @@ func run_scene() -> void:
 			):
 				key = node.if_block.next
 			else:
+				# Have to use this flag because we can't `continue` out of the 
+				# elif loop
+				var elif_condition_fulfilled := false
+
 				# Evaluate the elif's conditions
+				for block in node.elif_blocks:
+					if (
+						variables_list.has(block.condition.value)
+						and variables_list[block.condition.value]
+					):
+						key = block.next
+						elif_condition_fulfilled = true
+						break
 
 				# Go to else
-				key = node.else_block.next
+				if not elif_condition_fulfilled:
+					key = node.else_block.next
 
 		# Ensures we don't get stuck in an infinite loop if there's no line to display.
 		else:

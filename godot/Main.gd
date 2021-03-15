@@ -1,5 +1,6 @@
 extends Node
 
+
 export (Array, String, FILE) var scripts
 
 const ScenePlayer := preload("res://ScenePlayer.tscn")
@@ -7,8 +8,8 @@ const ScenePlayer := preload("res://ScenePlayer.tscn")
 const SCENES := []
 
 var _current_index := -1
-
 var _scene_player: ScenePlayer
+
 
 var lexer := SceneLexer.new()
 var parser := SceneParser.new()
@@ -16,6 +17,7 @@ var transpiler := SceneTranspiler.new()
 
 
 func _ready() -> void:
+
 	if not scripts.empty():
 		for script in scripts:
 			var text := lexer.read_file_content(script)
@@ -26,6 +28,7 @@ func _ready() -> void:
 			var dialogue: SceneTranspiler.DialogueTree = transpiler.transpile(tree, 0)
 
 			SCENES.append(dialogue)
+
 
 		_play_scene(0)
 
