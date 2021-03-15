@@ -82,7 +82,7 @@ func run_scene() -> void:
 			if key == KEY_RESTART_SCENE:
 				emit_signal("restart_requested")
 				return
-		elif node is SceneTranspiler.ConditionTreeNode:
+		elif node is SceneTranspiler.ConditionalTreeNode:
 			var variables_list = get_stored_variables_list()
 
 			# Evaluate the if's condition
@@ -92,7 +92,7 @@ func run_scene() -> void:
 			):
 				key = node.if_block.next
 			else:
-				# Have to use this flag because we can't `continue` out of the 
+				# Have to use this flag because we can't `continue` out of the
 				# elif loop
 				var elif_condition_fulfilled := false
 
@@ -157,8 +157,8 @@ func get_stored_variables_list() -> Dictionary:
 
 func load_scene(dialogue: SceneTranspiler.DialogueTree) -> void:
 	# Store the variables at the save file level
-	for variable in dialogue.GLOBALS.VARIABLES.keys():
-		add_variable(variable, dialogue.GLOBALS.VARIABLES[variable])
+	for variable in dialogue.GLOBALS.variables.keys():
+		add_variable(variable, dialogue.GLOBALS.variables[variable])
 
 	# The main script
 	_scene_data = dialogue.values

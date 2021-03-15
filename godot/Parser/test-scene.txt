@@ -11,9 +11,9 @@ dani neutral enter right "Hey, I'm Dani."
 choice:
 	"Start over":
 		"Starting over already?"
-		
+
 		set started_over true
-	
+
 		jump jump_location
 	"Continue":
 		sophia "Well, let's continue." # Inline comment
@@ -22,17 +22,16 @@ choice:
 		dani "Jumping ahead?"
 		sophia "Why not? Let's go!"
 		set jumped_ahead true
-		
+
 		# Reset
 		set started_over false
 
 		# scene next_scene
 		jump end_scene
-	
+
 
 "And thus started Sophia and Dani's journey."
 
 mark end_scene
 
 transition fade_out
-

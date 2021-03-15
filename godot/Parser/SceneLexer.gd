@@ -3,15 +3,15 @@ class_name SceneLexer
 extends Reference
 
 # The constants below list reserved keywords and built-in commands.
-const BUILT_IN_COMMANDS := [
-	"background",
-	"mark",
-	"scene",
-	"pass",
-	"jump",
-	"transition",
-	"set",
-]
+const BUILT_IN_COMMANDS := {
+	BACKGROUND = "background",
+	MARK = "mark",
+	SCENE = "scene",
+	PASS = "pass",
+	JUMP = "jump",
+	TRANSITION = "transition",
+	SET = "set",
+}
 const CONDITIONAL_STATEMENTS := ["if", "elif", "else"]
 const BOOLEAN_OPERATORS := ["and", "or", "not"]
 const CHOICE_KEYWORD := "choice"
@@ -221,7 +221,7 @@ func _tokenize_symbol(script: DialogueScript) -> Token:
 			push_error("Invalid character %s inside symbol" % character)
 			return Token.new("", "")
 
-	if symbol in BUILT_IN_COMMANDS:
+	if symbol in BUILT_IN_COMMANDS.values():
 		return Token.new(TOKEN_TYPES.COMMAND, symbol)
 	elif (
 		symbol in CONDITIONAL_STATEMENTS

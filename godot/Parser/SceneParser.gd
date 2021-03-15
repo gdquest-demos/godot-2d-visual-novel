@@ -10,6 +10,7 @@ class SyntaxTree:
 	# Starts with -1 instead of 0 so the transpiler will start parsing correctly
 	var current_index := -1
 
+
 	func append_expression(expression: BaseExpression) -> void:
 		values.append(expression)
 
@@ -37,9 +38,6 @@ class BaseExpression:
 		self.type = type
 		self.value = value
 
-	func _to_string() -> String:
-		return "{ type = %s , value = %s }" % [self.type, self.value]
-
 
 ## Represents an expression that can have arguments
 class FunctionExpression:
@@ -50,14 +48,6 @@ class FunctionExpression:
 		self.type = type
 		self.value = value
 		self.arguments = arguments
-
-	func _to_string() -> String:
-		var arr_string := ""
-
-		for arg in arguments:
-			arr_string += arg.to_string()
-
-		return "\n{ type = %s , value = %s, arguments = %s }" % [self.type, self.value, arr_string]
 
 
 ## Represents a labeled block in a choice tree that contains expressions
@@ -70,12 +60,9 @@ class ChoiceBlockExpression:
 		self.value = value
 		self.label = label
 
-	func _to_string() -> String:
-		return "{ type = %s , label = %s, value = %s}" % [self.type, self.label, self.value]
-
 
 ## Represents a single expression with a boolean condition and a block containing expressions
-class ConditionExpression:
+class ConditionalExpression:
 	extends BaseExpression
 	var block: Array
 
@@ -84,61 +71,26 @@ class ConditionExpression:
 		self.value = value
 		self.block = block
 
-	func _to_string() -> String:
-		var arr_string := ""
 
-		for value in block:
-			arr_string += value.to_string()
-
-		return "\n{ type = %s , value = %s, block = %s }" % [self.type, self.value, arr_string]
-
-
-## Represents a tree of ConditionExpressions
-class ConditionTreeExpression:
+## Represents a tree of ConditionalExpressions
+class ConditionalTreeExpression:
 	extends BaseExpression
-	var if_block: ConditionExpression
+	var if_block: ConditionalExpression
 	var elif_block: Array
-	var else_block: ConditionExpression
+	var else_block: ConditionalExpression
 
 	func _init(
 		type: String,
 		value: String,
-		if_block: ConditionExpression,
+		if_block: ConditionalExpression,
 		elif_block: Array,
-		else_block: ConditionExpression
+		else_block: ConditionalExpression
 	).(type, value) -> void:
 		self.type = type
 		self.value = value
 		self.if_block = if_block
 		self.elif_block = elif_block
 		self.else_block = else_block
-
-	func _to_string() -> String:
-		return (
-			"{ type = %s , value = %s,\nif_block = %s,\nelif_blocks = %s,\nelse_block = %s }"
-			% [self.type, self.value, self.if_block, self.elif_block, self.else_block]
-		)
-
-
-## Represents a single boolean operation on another value(s)
-class OperationExpression:
-	extends BaseExpression
-	var previous
-	var next
-
-	func _init(type: String, value: String, previous: BaseExpression, next: BaseExpression).(
-		type, value
-	) -> void:
-		self.type = type
-		self.value = value
-		self.previous = previous
-		self.next = next
-
-	func _to_string() -> String:
-		return (
-			"\n{ type = %s, value = %s, previous = %s, next = %s}"
-			% [self.type, self.value, self.previous, self.next]
-		)
 
 
 ## Class used to help the process of parsing through the token list
@@ -187,10 +139,10 @@ class Parser:
 		var arguments := []
 
 		while not self.is_at_end_of_list() and self.peek().type != stop_at_type:
-			var expr = self.parse_next_expression()
+			var expression := self.parse_next_token()
 
-			if expr:
-				arguments.append(expr)
+			if expression:
+				arguments.append(expression)
 
 		return arguments
 
@@ -205,17 +157,17 @@ class Parser:
 			self.move_to_next_token()
 
 		while not self.is_at_end_of_list():
-			var expr = self.parse_next_expression()
+			var expression := self.parse_next_token()
 
-			if expr == null:
+			if expression == null:
 				continue
 
-			if expr.type == SceneLexer.TOKEN_TYPES.BEGIN_BLOCK:
+			if expression.type == SceneLexer.TOKEN_TYPES.BEGIN_BLOCK:
 				indent_stack += 1
 
 				# Recursively parse the block
 				block_content.append(parse_indented_block())
-			elif expr.type == SceneLexer.TOKEN_TYPES.END_BLOCK:
+			elif expression.type == SceneLexer.TOKEN_TYPES.END_BLOCK:
 				indent_stack -= 1
 
 				if indent_stack == 0:
@@ -223,13 +175,13 @@ class Parser:
 				else:
 					break
 			else:
-				block_content.append(expr)
+				block_content.append(expression)
 
 		return []
 
 	## Parse to next token and returns an approriate expression for the syntax tree
-	func parse_next_expression() -> BaseExpression:
-		var current_token = self.move_to_next_token()
+	func parse_next_token() -> BaseExpression:
+		var current_token := self.move_to_next_token()
 
 		if (
 			self.get_previous_token()
@@ -242,39 +194,39 @@ class Parser:
 				in [SceneLexer.TOKEN_TYPES.SYMBOL, SceneLexer.TOKEN_TYPES.STRING_LITERAL]
 			)
 		):
-			# Dialogue line with some options (character, expression ,etc)
+			# Dialogue line with some options (character, expression, etc. )
 			if current_token.type == SceneLexer.TOKEN_TYPES.SYMBOL:
 				var arguments: Array = find_expressions(SceneLexer.TOKEN_TYPES.STRING_LITERAL)
 
 				# Push the character name to the front
 				arguments.push_front(current_token)
 
-				return FunctionExpression.new("Dialogue", parse_next_expression().value, arguments)
+				return FunctionExpression.new(EXPRESSION_TYPES.DIALOGUE, parse_next_token().value, arguments)
 			else:
 				# Narrator line
-				return FunctionExpression.new("Dialogue", current_token.value, [])
+				return FunctionExpression.new(EXPRESSION_TYPES.DIALOGUE, current_token.value, [])
 		elif current_token.type == SceneLexer.TOKEN_TYPES.COMMAND:
 			# Find the arguments until the parser hits newline
-			var arguments = self.find_expressions(SceneLexer.TOKEN_TYPES.NEWLINE)
+			var arguments := self.find_expressions(SceneLexer.TOKEN_TYPES.NEWLINE)
 
 			return FunctionExpression.new(current_token.type, current_token.value, arguments)
 		elif current_token.type == SceneLexer.TOKEN_TYPES.CHOICE:
 			var choice_blocks := []
 
 			while not self.is_at_end_of_list():
-				var token = self.move_to_next_token()
+				var token := self.move_to_next_token()
 
 				# The label for the choice block
 				if token.type == SceneLexer.TOKEN_TYPES.STRING_LITERAL:
 					# Parse the block
 					choice_blocks.append(
 						ChoiceBlockExpression.new(
-							"ChoiceBlock", self.parse_indented_block(), token.value
+							EXPRESSION_TYPES.CHOICE_BLOCK, self.parse_indented_block(), token.value
 						)
 					)
 				elif token.type == SceneLexer.TOKEN_TYPES.END_BLOCK:
 					# Return the choice tree
-					return BaseExpression.new(SceneLexer.TOKEN_TYPES.CHOICE, choice_blocks)
+					return BaseExpression.new(EXPRESSION_TYPES.CHOICE, choice_blocks)
 
 			push_error(
 				"Reached End of File before the parser could finish going through a choice tree"
@@ -282,8 +234,8 @@ class Parser:
 			return null
 		elif current_token.type == SceneLexer.TOKEN_TYPES.IF:
 			# Parse the condition and parse the expression inside the if block
-			var if_block := ConditionExpression.new(
-				SceneLexer.TOKEN_TYPES.IF,
+			var if_block := ConditionalExpression.new(
+				EXPRESSION_TYPES.IF,
 				self.find_expressions(SceneLexer.TOKEN_TYPES.BEGIN_BLOCK),
 				parse_indented_block()
 			)
@@ -294,42 +246,32 @@ class Parser:
 			# Handle elifs until there are none left
 			while self.peek().type == SceneLexer.TOKEN_TYPES.ELIF:
 				elif_block.append(
-					ConditionExpression.new(
-						"Elif",
+					ConditionalExpression.new(
+						EXPRESSION_TYPES.ELIF,
 						find_expressions(SceneLexer.TOKEN_TYPES.BEGIN_BLOCK),
 						parse_indented_block()
 					)
 				)
 
-			var else_block: ConditionExpression
+			var else_block: ConditionalExpression
 
 			if self.peek().type == SceneLexer.TOKEN_TYPES.ELSE:
 				# Increment the index so this will parse properly
 				self.move_to_next_token()
 
-				else_block = ConditionExpression.new(
-					SceneLexer.TOKEN_TYPES.ELSE, null, parse_indented_block()
+				else_block = ConditionalExpression.new(
+					EXPRESSION_TYPES.ELSE, null, parse_indented_block()
 				)
 
-			return ConditionTreeExpression.new(
-				"ConditionTree", "", if_block, elif_block, else_block
+			return ConditionalTreeExpression.new(
+				EXPRESSION_TYPES.CONDITIONAL_TREE, "", if_block, elif_block, else_block
 			)
 		elif (
 			current_token.type
 			in [SceneLexer.TOKEN_TYPES.AND, SceneLexer.TOKEN_TYPES.OR, SceneLexer.TOKEN_TYPES.NOT]
 		):
-			if current_token.type == SceneLexer.TOKEN_TYPES.NOT:
-				var next := parse_next_expression()
-
-				if next:
-					return OperationExpression.new(
-						"Operation", SceneLexer.TOKEN_TYPES.NOT, null, next
-					)
-				else:
-					return null
-			else:
-				push_error("Parsing AND and OR operators is not yet supported...")
-				return null
+			push_error("Parsing boolean operators is not yet supported...")
+			return null
 		elif (
 			current_token.type
 			in [
@@ -344,16 +286,28 @@ class Parser:
 			return null
 
 
-## Takes in a lexer token list and returns a syntax tree
+const EXPRESSION_TYPES := {
+	CONDITIONAL_TREE = "ConditionalTree",
+	CHOICE_BLOCK = "ChoiceBlock",
+	DIALOGUE = "Dialogue",
+	CHOICE = "Choice",
+	COMMAND = SceneLexer.TOKEN_TYPES.COMMAND,
+	IF = SceneLexer.TOKEN_TYPES.IF,
+	ELSE = SceneLexer.TOKEN_TYPES.ELSE,
+	ELIF = SceneLexer.TOKEN_TYPES.ELIF,
+	}
+
+
+## Takes in a token list from the lexer and returns a syntax tree
 func parse(tokens: Array) -> SyntaxTree:
 	var parser = Parser.new(tokens)
 
 	var tree := SyntaxTree.new()
 
 	while not parser.is_at_end_of_list():
-		var p: BaseExpression = parser.parse_next_expression()
+		var expression: BaseExpression = parser.parse_next_token()
 
-		if p:
-			tree.append_expression(p)
+		if expression:
+			tree.append_expression(expression)
 
 	return tree

@@ -14,11 +14,11 @@ if jumped_ahead:
 	dani "..."
 	dani "Well, you learned your lesson."
 	dani "I won't dwell on it... Your next time doing this though... That may be a different story altogether..."
-elif started_over:	
+elif started_over:
 	dani "Or maybe you clicked \"Started over\"?"
 	dani "That can tear a hole in the fabric of space-time some times..."
 	sophia "I think I did..."
-else:	
+else:
 	sophia "I swear on my mother's name that I did not jump ahead!"
 	sophia "How could you think I did that?"
 	dani "Oh..."
@@ -32,11 +32,10 @@ choice:
 		sophia "..."
 		sophia "Guess there's nothing else but that..."
 	"Find a way to escape":
-		dani "We gotta get out of here, man!" 
+		dani "We gotta get out of here, man!"
 		sophia "Good call."
 
 
 "And thus started Sophia's and Dani's other journey at the Steppes..."
 
 transition fade_out
-
