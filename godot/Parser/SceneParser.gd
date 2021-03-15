@@ -127,7 +127,7 @@ class OperationExpression:
 	var next
 
 	func _init(type: String, value: String, previous: BaseExpression, next: BaseExpression).(
-			type, value
+		type, value
 	) -> void:
 		self.type = type
 		self.value = value
@@ -135,7 +135,10 @@ class OperationExpression:
 		self.next = next
 
 	func _to_string() -> String:
-		return "\n{ type = %s, value = %s, previous = %s, next = %s}" % [self.type, self.value, self.previous, self.next]
+		return (
+			"\n{ type = %s, value = %s, previous = %s, next = %s}"
+			% [self.type, self.value, self.previous, self.next]
+		)
 
 
 ## Class used to help the process of parsing through the token list
@@ -224,7 +227,6 @@ class Parser:
 
 		return []
 
-
 	## Parse to next token and returns an approriate expression for the syntax tree
 	func parse_next_expression() -> BaseExpression:
 		var current_token = self.move_to_next_token()
@@ -274,7 +276,9 @@ class Parser:
 					# Return the choice tree
 					return BaseExpression.new(SceneLexer.TOKEN_TYPES.CHOICE, choice_blocks)
 
-			push_error("Reached End of File before the parser could finish going through a choice tree")
+			push_error(
+				"Reached End of File before the parser could finish going through a choice tree"
+			)
 			return null
 		elif current_token.type == SceneLexer.TOKEN_TYPES.IF:
 			# Parse the condition and parse the expression inside the if block

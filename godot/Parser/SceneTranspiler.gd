@@ -132,15 +132,53 @@ class ChoiceTreeNode:
 		self.next = next
 		self.choices = choices
 
-class ChoiceNode:
-	extends BaseNode
-	var label: String
-	var value: Dictionary
 
-	func _init(next: int, label: String, value: Dictionary).(next) -> void:
+class ConditionTreeNode:
+	extends BaseNode
+
+	var if_block: ConditionBlockNode
+
+	# Array because there can be multiple elifs
+	var elif_blocks: Array
+	var else_block: ConditionBlockNode
+
+	func _init(next: int, if_block: ConditionBlockNode).(next) -> void:
 		self.next = next
-		self.label = label
+		self.if_block = if_block
+
+
+class ConditionBlockNode:
+	extends BaseNode
+
+	var condition: SceneParser.BaseExpression
+
+	func _init(next: int, condition: SceneParser.BaseExpression).(next) -> void:
+		self.next = next
+		self.condition = condition
+
+
+class SetCommandNode:
+	extends BaseNode
+	var symbol: String
+	var value
+
+	func _init(next: int, symbol: String, value).(next) -> void:
+		self.next = next
+		self.symbol = symbol
 		self.value = value
+
+class JumpCommandNode:
+	extends BaseNode
+
+	func _init(next: int).(next) -> void:
+		self.next = next
+
+
+class PassCommandNode:
+	extends BaseNode
+
+	func _init(next: int).(next) -> void:
+		self.next = next
 
 
 const COMMAND_KEYWORDS := {
@@ -153,12 +191,37 @@ const COMMAND_KEYWORDS := {
 	SET = "set",
 }
 
+# Used to distinguish choice/if block's target number
+var unique_choice_id_modifier = 1000000000
+var unique_conditional_id_modifier = 2000000000
+
 
 ## Takes in a syntax tree from the SceneParser and turns it into a
 ## .scene script we can use
 func transpile(syntax_tree: SceneParser.SyntaxTree, starting_index: int) -> DialogueTree:
 	var dialogue_tree := DialogueTree.new()
 	dialogue_tree.index = starting_index
+
+	# Store all the declared jump points in advance
+	var jump_index := 0
+	for expression in syntax_tree.values:
+		if (
+			expression.type == SceneLexer.TOKEN_TYPES.COMMAND
+			and expression.value == COMMAND_KEYWORDS.MARK
+		):
+			var new_jump_point: String = (
+				expression.arguments[0].value
+				if expression.arguments[0]
+				else ""
+			)
+
+			if new_jump_point == "":
+				push_error("A `mark` command is missing an argument")
+				continue
+
+			dialogue_tree.add_jump_point(new_jump_point, jump_index)
+		else:
+			jump_index += 1
 
 	while not syntax_tree.is_at_end():
 		var expression: SceneParser.BaseExpression = syntax_tree.move_to_next_expression()
@@ -169,89 +232,67 @@ func transpile(syntax_tree: SceneParser.SyntaxTree, starting_index: int) -> Dial
 					var background: String = (
 						expression.arguments[0].value
 						if expression.arguments[0]
-						else null
+						else ""
 					)
 
-					if background == null:
+					if background == "":
 						push_error("A `background` command is missing an argument")
 						continue
 
-					var node = BackgroundCommandNode.new(dialogue_tree.index + 1, background)
+					var node := BackgroundCommandNode.new(dialogue_tree.index + 1, background)
 
 					node.transition = (
 						expression.arguments[1].value
 						if len(expression.arguments) > 1
-						else null
+						else ""
 					)
 
 					dialogue_tree.append_node(node)
-				COMMAND_KEYWORDS.MARK:
-					var new_jump_point: String = (
-						expression.arguments[0].value
-						if expression.arguments[0]
-						else null
-					)
-
-					if new_jump_point == null:
-						push_error("A `mark` command is missing an argument")
-						continue
-
-					# Store the jump point globally in the script file
-					dialogue_tree.add_jump_point(new_jump_point, dialogue_tree.index)
 				COMMAND_KEYWORDS.SCENE:
 					# For now we'll just use an absolute path as an argument
 					var new_scene: String = (
 						expression.arguments[0].value
 						if expression.arguments[0]
-						else null
+						else ""
 					)
 
-					if new_scene == null:
+					if new_scene == "":
 						push_error("A `scene` command is missing an argument")
 						continue
 
-					dialogue_tree.append_node(
-						SceneCommandNode.new(dialogue_tree.index + 1, new_scene)
-					)
+					dialogue_tree.append_node(SceneCommandNode.new(-1, new_scene))
 				COMMAND_KEYWORDS.PASS:
 					# Basically continue to the next node, this works since any choice/ifs are really just
 					# one node with despite all their child blocks
-					dialogue_tree.append_node(BaseNode.new(dialogue_tree.index + 1))
+					dialogue_tree.append_node(PassCommandNode.new(dialogue_tree.index + 1))
 				COMMAND_KEYWORDS.JUMP:
 					# Jump to an existing jump point
 					var jump_point: String = (
 						expression.arguments[0].value
 						if expression.arguments[0]
-						else null
+						else ""
 					)
 
-					if jump_point == null:
+					if jump_point == "":
 						push_error("A `jump` command is missing an argument")
 						continue
 
 					if dialogue_tree.has_jump_point(jump_point):
 						var target = dialogue_tree.get_jump_point(jump_point)
-						dialogue_tree.append_node(BaseNode.new(target))
+						dialogue_tree.append_node(JumpCommandNode.new(target))
 					else:
-						# Maybe there's a future jump point so we'll add one in regardless
-						# We'll do a check once we finish transpiling
-
-						# Maybe we should parse all the `mark` commands first though...
-
-
 						# -1 is a flag for an unknown jump_point
 						dialogue_tree.add_jump_point(jump_point, -1)
 
-
-						dialogue_tree.append_node(BaseNode.new(-1))
+						dialogue_tree.append_node(JumpCommandNode.new(-1))
 				COMMAND_KEYWORDS.TRANSITION:
 					var transition: String = (
 						expression.arguments[0].value
 						if expression.arguments[0]
-						else null
+						else ""
 					)
 
-					if transition == null:
+					if transition == "":
 						push_error("A `transition` command is missing an argument")
 						continue
 
@@ -262,24 +303,26 @@ func transpile(syntax_tree: SceneParser.SyntaxTree, starting_index: int) -> Dial
 					var symbol: String = (
 						expression.arguments[0].value
 						if expression.arguments[0]
-						else null
+						else ""
 					)
 
-					if symbol == null:
+					if symbol == "":
 						push_error("A `set` command is missing an argument")
 						continue
 
 					var value = (
 						expression.arguments[1].value
 						if len(expression.arguments) > 1
-						else null
+						else ""
 					)
 
-					if value == null:
+					if value == "":
 						push_error("A `set` command is missing an argument")
 						continue
 
-					dialogue_tree.add_variable(symbol, value)
+					dialogue_tree.append_node(SetCommandNode.new(dialogue_tree.index + 1, symbol, value))
+				COMMAND_KEYWORDS.MARK:
+					pass
 				_:
 					push_error("Unrecognized command type `%s`" % expression.value)
 					break
@@ -303,22 +346,143 @@ func transpile(syntax_tree: SceneParser.SyntaxTree, starting_index: int) -> Dial
 		elif expression.type == SceneLexer.TOKEN_TYPES.CHOICE:
 			var choices := []
 
-			# Go through the choices and transpile their blocks with a bit of recursion
+			var original_value = dialogue_tree.index
+
+			# Store the choice nodes at a normally unreacheable place in the dialogue tree
+			dialogue_tree.index += unique_choice_id_modifier
+
 			for block in expression.value:
 				var subtree := SceneParser.SyntaxTree.new()
 				subtree.values = block.value
 
-				# The dialogue tree for the choice block
+				dialogue_tree.index += 1
+
 				# Any jump points, variables that get declared in the block's tree don't need to be handled since
 				# the JUMP_POINTS, VARIABLES are constants that are shared between all DialogueTree instances
+				# We pass in the current index tree's index here so the subtree can transpile properly
 				var block_dialogue_tree: DialogueTree = transpile(subtree, dialogue_tree.index)
 
-				choices.append(ChoiceNode.new(dialogue_tree.index + 1, block.label, block_dialogue_tree.values))
+				choices.append({label = block.label, target = dialogue_tree.index})
 
-			print(choices)
+				# Add the block's tree's nodes to the main dialogue tree
+				for node in block_dialogue_tree.values.keys():
+					dialogue_tree.values[node] = block_dialogue_tree.values[node]
+					if (
+						node == block_dialogue_tree.values.keys().back()
+						and not (
+							dialogue_tree.values[node] is JumpCommandNode
+							or dialogue_tree.values[node] is PassCommandNode
+							or dialogue_tree.values[node] is SceneCommandNode
+						)
+					):
+						# Modify the final node's next value to properly continue on after the choice is made
+						dialogue_tree.values[node].next = original_value + 1
+					dialogue_tree.index += 1
+
+			# Reset the index
+			dialogue_tree.index = original_value
 
 			dialogue_tree.append_node(ChoiceTreeNode.new(dialogue_tree.index + 1, choices))
-		elif expression.type == "ConditionTree":  # If's
-			pass
+		elif expression.type == "ConditionTree":
+			if expression.if_block == null:
+				push_error("Invalid condition tree")
+				continue
+
+			# Store the if nodes at a normally unreacheable place in the dialogue tree, apart from the choice nodes
+			var original_value = dialogue_tree.index
+			dialogue_tree.index += unique_conditional_id_modifier
+
+			dialogue_tree.index += 1
+
+			var tree_node = ConditionTreeNode.new(
+				original_value + 1,
+				ConditionBlockNode.new(
+					dialogue_tree.index,
+					expression.if_block.value.front() # To be changed to something cleaner
+					)
+				)
+
+			# Transpile the if block
+			var if_subtree := SceneParser.SyntaxTree.new()
+			if_subtree.values = expression.if_block.block
+			var if_block_dialogue_tree: DialogueTree = transpile(if_subtree, dialogue_tree.index)
+
+			# Add the if block's tree's nodes to the main dialogue tree
+			for node in if_block_dialogue_tree.values.keys():
+				dialogue_tree.values[node] = if_block_dialogue_tree.values[node]
+				if (
+					node == if_block_dialogue_tree.values.keys().back()
+					and not (
+						dialogue_tree.values[node] is JumpCommandNode
+						or dialogue_tree.values[node] is PassCommandNode
+						or dialogue_tree.values[node] is SceneCommandNode
+						)
+				):
+					# Modify the final node's next value to properly continue on after the choice is made
+					dialogue_tree.values[node].next = original_value + 1
+				dialogue_tree.index += 1
+
+
+			# # Transpile the elif blocks
+			# if not expression.elif_block.empty():
+			# 	var elif_blocks := []
+
+			# 	for elif_block in expression.elif_block:
+			# 		var elif_subtree := SceneParser.SyntaxTree.new()
+			# 		elif_subtree.values = elif_block.block
+
+			# 		var elif_block_dialogue_tree: DialogueTree = transpile(
+			# 			elif_subtree, dialogue_tree.index
+			# 		)
+
+			# 		elif_blocks.append(
+			# 			ConditionBlockNode.new(
+			# 				dialogue_tree.index + 1,
+			# 				elif_block.value[0].value,  # To be changed
+			# 				elif_block_dialogue_tree.values
+			# 			)
+			# 		)
+
+			# 	node.elif_block = elif_blocks
+
+			# Transpile the else block
+			if expression.else_block != null:
+				var else_subtree := SceneParser.SyntaxTree.new()
+				else_subtree.values = expression.else_block.block
+
+				var else_block_dialogue_tree: DialogueTree = transpile(
+					else_subtree, dialogue_tree.index
+				)
+
+				# Store to pointer to the else block
+				tree_node.else_block = ConditionBlockNode.new(dialogue_tree.index, null)
+
+				# Add the else block's tree's nodes to the main dialogue tree
+				for node in else_block_dialogue_tree.values.keys():
+					dialogue_tree.values[node] = else_block_dialogue_tree.values[node]
+					if (
+						node == else_block_dialogue_tree.values.keys().back()
+						and not (
+							dialogue_tree.values[node] is JumpCommandNode
+							or dialogue_tree.values[node] is PassCommandNode
+							or dialogue_tree.values[node] is SceneCommandNode
+							)
+						):
+						# Modify the final node's next value to properly continue on after the choice is made
+						dialogue_tree.values[node].next = original_value + 1
+						dialogue_tree.index += 1
+
+
+			# Reset the index
+			dialogue_tree.index = original_value
+
+			dialogue_tree.append_node(tree_node)
+		else:
+			push_error("Unrecognized expression of type: %s with value: %s")
+			continue
+
+	# Make sure the scene is transitioned properly
+	if not dialogue_tree.values[dialogue_tree.index - 1] is JumpCommandNode:
+		(dialogue_tree.values[dialogue_tree.index - 1] as BaseNode).next = -1
 
 	return dialogue_tree

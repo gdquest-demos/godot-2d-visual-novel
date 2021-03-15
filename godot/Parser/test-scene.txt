@@ -1,5 +1,8 @@
-background industrial_building fade_in
+
 mark jump_location
+
+background industrial_building fade_in
+
 
 sophia happy enter left "Hi there! My name's Sophia. How about you?"
 dani neutral enter right "Hey, I'm Dani."
@@ -7,36 +10,19 @@ dani neutral enter right "Hey, I'm Dani."
 # Comment
 choice:
 	"Start over":
-		if not player_choice:
-			"Starting over..."
-		else:
-			"choice unfulfilled"
-			dani surprised "Really!?"
+		"Starting over already?"
+		
 		jump jump_location
 	"Continue":
-		pass
+		sophia "Well, let's continue." # Inline comment
+		set jumped_ahead false
 	"Jump ahead":
+		dani "Jumping ahead?"
+		sophia "Why not? Let's go!"
 		set jumped_ahead true
-		jump next_jump_point
 
-sophia "Well, let's continue." # Inline comment
-mark next_jump_point
-
-if jumped_ahead:
-	background steppes
-	dani "Did you jump ahead?"
-	if not_jumped_ahead:
-		sophia "Guess I didn't"
-		if really_jumped_ahead:
-			sophia "I said I didn't!"
-	scene next_scene
-elif another_choice:
-	dani "I was about to say something..."
-	dani happy "But I forgot... Haha!"
-else: 
-	dani "I feel like we just experienced a major divergence in the timeline..."
-	dani "Or maybe I'm just over-thinking things again... Urgh..."
 
 "And thus started Sophia and Dani's journey."
 
 transition fade_out
+

@@ -4,3 +4,4 @@
 
 [node name="Main" type="Node"]
 script = ExtResource( 1 )
+scripts = [ "res://Parser/test-scene.txt", "res://Parser/test-scene2.txt" ]

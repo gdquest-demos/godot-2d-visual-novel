@@ -17,7 +17,5 @@ func _ready() -> void:
 
 	# print(tree.values)
 
+	# The finished .scene script
 	var script: SceneTranspiler.DialogueTree = transpiler.transpile(tree, 0)
-
-	print(script.GLOBALS)
-	print(script.values)

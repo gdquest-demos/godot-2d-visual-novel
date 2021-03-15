@@ -11,23 +11,15 @@ const BUILT_IN_COMMANDS := [
 	"jump",
 	"transition",
 	"set",
-	]
-const CONDITIONAL_STATEMENTS := [
-	"if",
-	"elif",
-	"else"
-	]
-const BOOLEAN_OPERATORS := [
-	"and",
-	"or",
-	"not"
-	]
+]
+const CONDITIONAL_STATEMENTS := ["if", "elif", "else"]
+const BOOLEAN_OPERATORS := ["and", "or", "not"]
 const CHOICE_KEYWORD := "choice"
 
 ## Mapping of types we can assign to `Token.type`.
 const TOKEN_TYPES := {
 	SYMBOL = "Symbol",
-	COMMAND = "Function",
+	COMMAND = "Command",
 	STRING_LITERAL = "String",
 	CHOICE = "Choice",
 	IF = "If",
@@ -40,7 +32,7 @@ const TOKEN_TYPES := {
 	AND = "And",
 	OR = "Or",
 	NOT = "Not"
-	}
+}
 
 # We allow lower and uppercase letters, numbers, and underscores in identifiers.
 var symbol_regex := RegEx.new()
@@ -216,7 +208,6 @@ func _tokenize_symbol(script: DialogueScript) -> Token:
 	# valid identifier (isn't a digit).
 	var symbol := "%s" % script.get_current_character()
 
-
 	while not script.is_at_end_of_file():
 		var character = script.move_to_next_character()
 
@@ -232,7 +223,11 @@ func _tokenize_symbol(script: DialogueScript) -> Token:
 
 	if symbol in BUILT_IN_COMMANDS:
 		return Token.new(TOKEN_TYPES.COMMAND, symbol)
-	elif symbol in CONDITIONAL_STATEMENTS or symbol in BOOLEAN_OPERATORS or symbol == CHOICE_KEYWORD:
+	elif (
+		symbol in CONDITIONAL_STATEMENTS
+		or symbol in BOOLEAN_OPERATORS
+		or symbol == CHOICE_KEYWORD
+	):
 		return Token.new(TOKEN_TYPES[symbol.to_upper()], "")
 	else:
 		return Token.new(TOKEN_TYPES.SYMBOL, symbol)
