@@ -240,7 +240,7 @@ func transpile(syntax_tree: SceneParser.SyntaxTree, starting_index: int) -> Dial
 					dialogue_tree.append_node(SceneCommandNode.new(dialogue_tree.index + 1, new_scene))
 				SceneLexer.BUILT_IN_COMMANDS.PASS:
 					# This command doesn't work yet because the logic for jumping out of code blocks is still really messy
-					pass
+					push_error("The `pass` command is not yet supported...")
 				SceneLexer.BUILT_IN_COMMANDS.JUMP:
 					# Jump to an existing jump point
 					var jump_point: String = (
