@@ -22,9 +22,16 @@ choice:
 		dani "Jumping ahead?"
 		sophia "Why not? Let's go!"
 		set jumped_ahead true
+		
+		# Reset
+		set started_over false
 
+		jump end_scene
+	
 
 "And thus started Sophia and Dani's journey."
+
+mark end_scene
 
 transition fade_out
 
