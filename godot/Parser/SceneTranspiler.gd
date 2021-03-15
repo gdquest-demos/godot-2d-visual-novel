@@ -124,13 +124,23 @@ class TransitionCommandNode:
 
 
 ## Represents a branching path in the dialogue tree
-class ChoiceNode:
+class ChoiceTreeNode:
 	extends BaseNode
 	var choices: Array
 
 	func _init(next: int, choices: Array).(next) -> void:
 		self.next = next
 		self.choices = choices
+
+class ChoiceNode:
+	extends BaseNode
+	var label: String
+	var value: Dictionary
+
+	func _init(next: int, label: String, value: Dictionary).(next) -> void:
+		self.next = next
+		self.label = label
+		self.value = value
 
 
 const COMMAND_KEYWORDS := {
@@ -146,8 +156,9 @@ const COMMAND_KEYWORDS := {
 
 ## Takes in a syntax tree from the SceneParser and turns it into a
 ## .scene script we can use
-func transpile(syntax_tree: SceneParser.SyntaxTree) -> DialogueTree:
+func transpile(syntax_tree: SceneParser.SyntaxTree, starting_index: int) -> DialogueTree:
 	var dialogue_tree := DialogueTree.new()
+	dialogue_tree.index = starting_index
 
 	while not syntax_tree.is_at_end():
 		var expression: SceneParser.BaseExpression = syntax_tree.move_to_next_expression()
@@ -203,9 +214,9 @@ func transpile(syntax_tree: SceneParser.SyntaxTree) -> DialogueTree:
 						SceneCommandNode.new(dialogue_tree.index + 1, new_scene)
 					)
 				COMMAND_KEYWORDS.PASS:
-					# Break out of any choice/if blocks the dialogue is currently in
-
-					pass
+					# Basically continue to the next node, this works since any choice/ifs are really just
+					# one node with despite all their child blocks
+					dialogue_tree.append_node(BaseNode.new(dialogue_tree.index + 1))
 				COMMAND_KEYWORDS.JUMP:
 					# Jump to an existing jump point
 					var jump_point: String = (
@@ -222,7 +233,17 @@ func transpile(syntax_tree: SceneParser.SyntaxTree) -> DialogueTree:
 						var target = dialogue_tree.get_jump_point(jump_point)
 						dialogue_tree.append_node(BaseNode.new(target))
 					else:
-						push_error("Jump point %s does not exist" % jump_point)
+						# Maybe there's a future jump point so we'll add one in regardless
+						# We'll do a check once we finish transpiling
+
+						# Maybe we should parse all the `mark` commands first though...
+
+
+						# -1 is a flag for an unknown jump_point
+						dialogue_tree.add_jump_point(jump_point, -1)
+
+
+						dialogue_tree.append_node(BaseNode.new(-1))
 				COMMAND_KEYWORDS.TRANSITION:
 					var transition: String = (
 						expression.arguments[0].value
@@ -280,22 +301,23 @@ func transpile(syntax_tree: SceneParser.SyntaxTree) -> DialogueTree:
 
 			dialogue_tree.append_node(node)
 		elif expression.type == SceneLexer.TOKEN_TYPES.CHOICE:
-			# var choices := []
+			var choices := []
 
-			# # Go through the choices and transpile their blocks with a bit of recursion
-			# for block in expression.value:
-			# 	var subtree := SceneParser.SyntaxTree.new()
-			# 	subtree.value = block.value
+			# Go through the choices and transpile their blocks with a bit of recursion
+			for block in expression.value:
+				var subtree := SceneParser.SyntaxTree.new()
+				subtree.values = block.value
 
-			# 	# The dialogue tree for the choice block
-			# 	var block_dialogue_tree = transpile(subtree)
+				# The dialogue tree for the choice block
+				# Any jump points, variables that get declared in the block's tree don't need to be handled since
+				# the JUMP_POINTS, VARIABLES are constants that are shared between all DialogueTree instances
+				var block_dialogue_tree: DialogueTree = transpile(subtree, dialogue_tree.index)
 
-			# 	choices.append({
-			# 		label = block.label
-			# 		value = block_dialogue_tree
-			# 		})
+				choices.append(ChoiceNode.new(dialogue_tree.index + 1, block.label, block_dialogue_tree.values))
 
-			pass
+			print(choices)
+
+			dialogue_tree.append_node(ChoiceTreeNode.new(dialogue_tree.index + 1, choices))
 		elif expression.type == "ConditionTree":  # If's
 			pass
 
