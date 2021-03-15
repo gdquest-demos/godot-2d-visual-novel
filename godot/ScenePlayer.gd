@@ -66,6 +66,13 @@ func run_scene() -> void:
 			add_variable(node.symbol, node.value)
 			key = node.next
 
+		# Change to another scene
+		elif node is SceneTranspiler.SceneCommandNode:
+			if node.scene_path == "next_scene":
+				key = KEY_END_OF_SCENE
+			else:
+				key = node.next
+
 		# Choices.
 		elif node is SceneTranspiler.ChoiceTreeNode:
 			_text_box.display_choice(node.choices)

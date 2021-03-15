@@ -26,6 +26,7 @@ choice:
 		# Reset
 		set started_over false
 
+		# scene next_scene
 		jump end_scene
 	
 

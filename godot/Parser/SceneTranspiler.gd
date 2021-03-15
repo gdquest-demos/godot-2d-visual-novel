@@ -226,7 +226,8 @@ func transpile(syntax_tree: SceneParser.SyntaxTree, starting_index: int) -> Dial
 
 					dialogue_tree.append_node(node)
 				COMMAND_KEYWORDS.SCENE:
-					# For now we'll just use an absolute path as an argument
+					# For now, the command only works when next_scene is used as an argument
+					# It shouldn't be too hard to allow for file paths to be used as arguments in the future
 					var new_scene: String = (
 						expression.arguments[0].value
 						if expression.arguments[0]
@@ -237,7 +238,7 @@ func transpile(syntax_tree: SceneParser.SyntaxTree, starting_index: int) -> Dial
 						push_error("A `scene` command is missing an argument")
 						continue
 
-					dialogue_tree.append_node(SceneCommandNode.new(-1, new_scene))
+					dialogue_tree.append_node(SceneCommandNode.new(dialogue_tree.index + 1, new_scene))
 				COMMAND_KEYWORDS.PASS:
 					# pass doesn't work yet
 					# The logic for jumping out of code blocks is still really messy
@@ -261,7 +262,7 @@ func transpile(syntax_tree: SceneParser.SyntaxTree, starting_index: int) -> Dial
 						# -1 is a flag for an unknown jump_point
 						dialogue_tree.add_jump_point(jump_point, -1)
 
-						dialogue_tree.append_node(JumpCommandNode.new(-1))
+					dialogue_tree.append_node(JumpCommandNode.new(-1))
 				COMMAND_KEYWORDS.TRANSITION:
 					var transition: String = (
 						expression.arguments[0].value
