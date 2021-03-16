@@ -106,9 +106,13 @@ func run_scene() -> void:
 						elif_condition_fulfilled = true
 						break
 
-				# Go to else
 				if not elif_condition_fulfilled:
-					key = node.else_block.next
+					if node.else_block:
+						# Go to else
+						key = node.else_block.next
+					else:
+						# Move on
+						key = node.next
 
 		# Ensures we don't get stuck in an infinite loop if there's no line to display.
 		else:
