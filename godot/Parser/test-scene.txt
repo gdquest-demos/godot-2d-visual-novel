@@ -12,6 +12,7 @@ choice:
 		choice:	
 			"Yes, I'm sure.":
 				"Alrighty then."
+				set started_over true
 				jump jump_location
 			"Uhm...":
 				"Maybe you should think about this more..."
@@ -21,10 +22,12 @@ choice:
 					"No... I'll do it":
 						"As you wish."
 						"Starting over..."
+						set started_over true
 						jump jump_location
 			"No. Don't.":
 				"Well..."
 				"Be careful the next time you think about starting over!"
+				set started_over false
 	"Continue":
 		set jumped_ahead false
 	"Jump ahead":
@@ -38,6 +41,7 @@ sophia "Well, let's continue."
 "Want to start over?" # Inline comment! 
 choice:	
 	"Yes":
+		set started_over true
 		jump jump_location
 	"Uhmm":
 		jump rethink
