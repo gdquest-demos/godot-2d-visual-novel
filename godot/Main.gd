@@ -27,6 +27,10 @@ func _ready() -> void:
 
 			var dialogue: SceneTranspiler.DialogueTree = transpiler.transpile(tree, 0)
 
+			# Make sure the scene is transitioned properly at the end of the script
+			if not dialogue.values[dialogue.index - 1] is SceneTranspiler.JumpCommandNode:
+				(dialogue.values[dialogue.index - 1] as SceneTranspiler.BaseNode).next = -1
+
 			SCENES.append(dialogue)
 
 

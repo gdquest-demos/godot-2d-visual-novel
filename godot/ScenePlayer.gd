@@ -75,6 +75,11 @@ func run_scene() -> void:
 
 		# Choices.
 		elif node is SceneTranspiler.ChoiceTreeNode:
+			# Temporary fix for the buttons not showing when there are consecutive choice nodes
+			yield(get_tree(), "idle_frame")
+			yield(get_tree(), "idle_frame")
+			yield(get_tree(), "idle_frame")
+
 			_text_box.display_choice(node.choices)
 
 			key = yield(_text_box, "choice_made")

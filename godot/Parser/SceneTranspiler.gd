@@ -239,8 +239,9 @@ func transpile(syntax_tree: SceneParser.SyntaxTree, starting_index: int) -> Dial
 
 					dialogue_tree.append_node(SceneCommandNode.new(dialogue_tree.index + 1, new_scene))
 				SceneLexer.BUILT_IN_COMMANDS.PASS:
-					# This command doesn't work yet because the logic for jumping out of code blocks is still really messy
-					push_error("The `pass` command is not yet supported...")
+					# Using `pass` is just syntactic sugar since a `pass` node is always appended at the end of each code block anyways
+					# to allow the blocks to escape to its parent properly when it's finished
+					pass
 				SceneLexer.BUILT_IN_COMMANDS.JUMP:
 					# Jump to an existing jump point
 					var jump_point: String = (
@@ -423,15 +424,16 @@ func transpile(syntax_tree: SceneParser.SyntaxTree, starting_index: int) -> Dial
 		else:
 			push_error("Unrecognized expression of type: %s with value: %s" % [expression.type, expression.value])
 
-	# Make sure the scene is transitioned properly
-	if not dialogue_tree.values[dialogue_tree.index - 1] is JumpCommandNode:
-		(dialogue_tree.values[dialogue_tree.index - 1] as BaseNode).next = -1
-
 	return dialogue_tree
 
 
 ## Adds node from a source tree to a target tree
 func _add_nodes_to_tree(original_value: int, nodes : Array, target_tree: DialogueTree, source_tree: DialogueTree) -> void:
+	# Append a `pass` node to the end of the block to make sure it'll end and properly continue
+	# to its parent block
+	source_tree.append_node(PassCommandNode.new(original_value + 1))
+	nodes.append(source_tree.values.keys().back())
+
 	# Add the else block's tree's nodes to the main dialogue tree
 	for node in nodes:
 		target_tree.values[node] = source_tree.values[node]
@@ -440,7 +442,6 @@ func _add_nodes_to_tree(original_value: int, nodes : Array, target_tree: Dialogu
 			node == source_tree.values.keys().back()
 			and not (
 				target_tree.values[node] is JumpCommandNode
-				or target_tree.values[node] is PassCommandNode
 				or target_tree.values[node] is SceneCommandNode
 				)
 			):

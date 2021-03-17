@@ -1,37 +1,45 @@
-
 mark jump_location
 
 background industrial_building fade_in
 
-
 sophia happy enter left "Hi there! My name's Sophia. How about you?"
 dani neutral enter right "Hey, I'm Dani."
 
-# Comment
+set haha true
+
+mark rethink
+
 choice:
 	"Start over":
-		"Starting over already?"
-
-		set started_over true
-
-		jump jump_location
+		"Starting over?"
+		choice:	
+			"Yes, I'm sure.":
+				"Alrighty then."
+				jump jump_location
+			"Uhm...":
+				"Maybe you should think about this more..."
+				choice:
+					"Yeah... maybe I should...":
+						jump rethink
+					"No... I'll do it":
+						"As you wish."
+						"Starting over..."
+						jump jump_location
+			"No. Don't.":
+				"Well..."
+				"Be careful the next time you think about starting over!"
+				jump rethink
 	"Continue":
-		sophia "Well, let's continue." # Inline comment
 		set jumped_ahead false
+		pass
 	"Jump ahead":
-		dani "Jumping ahead?"
-		sophia "Why not? Let's go!"
 		set jumped_ahead true
+		jump next_jump_point
 
-		# Reset
-		set started_over false
+sophia "Well, let's continue."
 
-		# scene next_scene
-		jump end_scene
-
+mark next_jump_point
 
 "And thus started Sophia and Dani's journey."
-
-mark end_scene
 
 transition fade_out
