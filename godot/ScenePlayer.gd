@@ -6,8 +6,6 @@ signal scene_finished
 signal restart_requested
 signal transition_finished
 
-const SAVE_FILE_LOCATION := "user://2DVisualNovelDemo.save"
-
 const KEY_END_OF_SCENE := -1
 const KEY_RESTART_SCENE := -2
 
@@ -63,7 +61,7 @@ func run_scene() -> void:
 
 		# Manage variables
 		elif node is SceneTranspiler.SetCommandNode:
-			add_variable(node.symbol, node.value)
+			Variables.add_variable(node.symbol, node.value)
 			key = node.next
 
 		# Change to another scene
@@ -88,7 +86,7 @@ func run_scene() -> void:
 				emit_signal("restart_requested")
 				return
 		elif node is SceneTranspiler.ConditionalTreeNode:
-			var variables_list = get_stored_variables_list()
+			var variables_list: Dictionary = Variables.get_stored_variables_list()
 
 			# Evaluate the if's condition
 			if (
@@ -127,48 +125,7 @@ func run_scene() -> void:
 	emit_signal("scene_finished")
 
 
-func add_variable(name: String, value) -> void:
-	var save_file: File = File.new()
-
-	save_file.open(SAVE_FILE_LOCATION, File.READ_WRITE)
-
-	var data: Dictionary = (
-		parse_json(save_file.get_as_text())
-		if save_file.get_as_text()
-		else {variables = {}}
-	)
-
-	if name != "":
-		if not data.has("variables"):
-			data["variables"] = {}
-
-		data["variables"][name] = evaluate(value)
-
-	save_file.store_line(to_json(data))
-	save_file.close()
-
-
-func get_stored_variables_list() -> Dictionary:
-	var save_file: File = File.new()
-
-	# Stop if the save file doesn't exist
-	if not save_file.file_exists(SAVE_FILE_LOCATION):
-		return {}
-
-	save_file.open(SAVE_FILE_LOCATION, File.READ)
-
-	var data: Dictionary = parse_json(save_file.get_as_text())
-
-	save_file.close()
-
-	return data.variables
-
-
 func load_scene(dialogue: SceneTranspiler.DialogueTree) -> void:
-	# Store the variables at the save file level
-	for variable in dialogue.GLOBALS.variables.keys():
-		add_variable(variable, dialogue.GLOBALS.variables[variable])
-
 	# The main script
 	_scene_data = dialogue.values
 
@@ -193,13 +150,3 @@ func _store_scene_data(data: Dictionary, path: String) -> void:
 	file.open(path, File.WRITE)
 	file.store_string(var2str(_scene_data))
 	file.close()
-
-
-# Used to evaluate the condition for the conditionals
-func evaluate(input):
-	var script = GDScript.new()
-	script.set_source_code("func eval():\n\treturn " + input)
-	script.reload()
-	var obj = Reference.new()
-	obj.set_script(script)
-	return obj.eval()

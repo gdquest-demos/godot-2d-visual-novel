@@ -69,6 +69,7 @@ config/icon="res://icon.png"
 [autoload]
 
 ResourceDB="*res://Autoloads/ResourceDB.gd"
+Variables="*res://Autoloads/Variables.gd"
 
 [debug]
 

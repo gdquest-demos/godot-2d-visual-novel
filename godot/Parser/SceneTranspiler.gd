@@ -4,12 +4,6 @@ extends Reference
 
 
 class DialogueTree:
-	# Store variables, jump points, etc.
-	const GLOBALS := {
-		jump_points = {},
-		variables = {}
-		}
-
 	var values := {}
 
 	var index := 0
@@ -18,35 +12,6 @@ class DialogueTree:
 	func append_node(node: BaseNode) -> void:
 		values[index] = node
 		index += 1
-
-	func add_variable(symbol: String, value) -> void:
-		# For simplicity's sake, this function can both create new variables and modify existing ones
-		GLOBALS.variables[symbol] = value
-
-	func get_variable(symbol: String):
-		if GLOBALS.variables.has(symbol):
-			return GLOBALS.variables[symbol]
-		else:
-			push_error("Could not find variable with the symbol `%s`" % symbol)
-			return null
-
-	func add_jump_point(name: String, index: int) -> void:
-		if GLOBALS.jump_points.has(name):
-			push_error("Jump point already exists")
-			return
-
-		GLOBALS.jump_points[name] = index
-
-	func has_jump_point(name: String) -> bool:
-		return GLOBALS.jump_points.has(name)
-
-	func get_jump_point(name: String) -> int:
-		if has_jump_point(name):
-			return GLOBALS.jump_points[name]
-
-		# -3 because -1, -2 are already used in the ScenePlayer interpreter
-		return -3
-
 
 ## Reprents a simple node in the dialogue tree
 class BaseNode:
@@ -171,8 +136,11 @@ class PassCommandNode:
 const UNIQUE_CHOICE_ID_MODIFIER = 1000000000
 const UNIQUE_CONDITIONAL_ID_MODIFIER = 2100000000
 
+
+var _jump_points := {}
+
 # Store jump nodes with unknown jump points
-var unresolved_jump_nodes := []
+var _unresolved_jump_nodes := []
 
 
 ## Takes in a syntax tree from the SceneParser and turns it into a
@@ -237,19 +205,19 @@ func transpile(syntax_tree: SceneParser.SyntaxTree, starting_index: int) -> Dial
 						push_error("A `jump` command is missing an argument")
 						continue
 
-					if dialogue_tree.has_jump_point(jump_point):
-						var target = dialogue_tree.get_jump_point(jump_point)
+					if _has_jump_point(jump_point):
+						var target: int = _get_jump_point(jump_point)
 						dialogue_tree.append_node(JumpCommandNode.new(target))
 					else:
 						# Store as an unresolved jump node
 
-						var jump_node = JumpCommandNode.new(-1)
+						var jump_node := JumpCommandNode.new(-1)
 						jump_node.jump_point = jump_point
 
 						dialogue_tree.append_node(jump_node)
 
 						# Pass in the instance by reference so we can modify this later
-						unresolved_jump_nodes.append(jump_node)
+						_unresolved_jump_nodes.append(jump_node)
 				SceneLexer.BUILT_IN_COMMANDS.TRANSITION:
 					var transition: String = (
 						expression.arguments[0].value
@@ -297,17 +265,17 @@ func transpile(syntax_tree: SceneParser.SyntaxTree, starting_index: int) -> Dial
 						push_error("A `mark` command is missing an argument")
 						continue
 
-					dialogue_tree.add_jump_point(new_jump_point, dialogue_tree.index)
+					_add_jump_point(new_jump_point, dialogue_tree.index)
 
 					# Handle any unresolved jump nodes that point to this jump point
 					# Use a `temp` variable because modifying an array while also looping through it can get buggy
-					var temp := unresolved_jump_nodes
-					for jump_node in unresolved_jump_nodes:
+					var temp := _unresolved_jump_nodes
+					for jump_node in _unresolved_jump_nodes:
 						if jump_node.jump_point == new_jump_point:
 							jump_node.next = dialogue_tree.index
 							temp.erase(jump_node)
 
-					unresolved_jump_nodes = temp
+					_unresolved_jump_nodes = temp
 				_:
 					push_error("Unrecognized command type `%s`" % expression.value)
 					continue
@@ -365,7 +333,7 @@ func transpile(syntax_tree: SceneParser.SyntaxTree, starting_index: int) -> Dial
 
 			# Stores the position for the conditional tree node which has pointers to the actual conditional blocks
 			# that are stored at a unique place
-			var original_value = dialogue_tree.index
+			var original_value := dialogue_tree.index
 
 			# Store the if nodes at a normally unreacheable place in the dialogue tree, apart from the choice nodes
 			dialogue_tree.index += UNIQUE_CONDITIONAL_ID_MODIFIER
@@ -447,3 +415,23 @@ func _add_nodes_to_tree(original_value: int, nodes : Array, target_tree: Dialogu
 	for node in nodes:
 		target_tree.values[node] = source_tree.values[node]
 		target_tree.index += 1
+
+
+func _add_jump_point(name: String, index: int) -> void:
+	if _jump_points.has(name):
+		push_error("Jump point already exists")
+		return
+
+	_jump_points[name] = index
+
+
+func _has_jump_point(name: String) -> bool:
+	return _jump_points.has(name)
+
+
+func _get_jump_point(name: String) -> int:
+	if _has_jump_point(name):
+		return _jump_points[name]
+
+	# -3 because -1, -2 are already used in the ScenePlayer interpreter
+	return -3
