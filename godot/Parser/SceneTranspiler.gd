@@ -1,11 +1,26 @@
-## Receives a SyntaxTree and produces a script dictionary for the ScenePlayer
+## Receives a `SceneParser.SyntaxTree` and produces a `DialogueTree`, an object
+## representing a scene, which a `ScenePlayer` instance can read.
+##
+## Use the `transpile()` method to get a `DialogueTree`.
 class_name SceneTranspiler
 extends Reference
 
+# We assign a number to every step in a generated `DialogueTree`.
+# We use the numbers below to offset the index number of choices and conditional
+# blocks. This helps us to group them in the `DialogueTree.nodes` dictionary.
+const UNIQUE_CHOICE_ID_MODIFIER = 1000000000
+const UNIQUE_CONDITIONAL_ID_MODIFIER = 2100000000
 
+
+# A mapping of named jump points to a corresponding node in the tree.
+var _jump_points := {}
+# Store jump nodes with unknown jump points
+var _unresolved_jump_nodes := []
+
+
+## A tree of nodes representing a scene. It stores nodes in its `nodes` dictionary.
+## See the node types below.
 class DialogueTree:
-	var values := {}
-
 	var index := 0
 
 	## Add a new node to the tree and assign it a unique index in the tree
@@ -13,7 +28,8 @@ class DialogueTree:
 		values[index] = node
 		index += 1
 
-## Reprents a simple node in the dialogue tree
+
+## Base type for all other node types below.
 class BaseNode:
 	var next: int
 
@@ -21,7 +37,7 @@ class BaseNode:
 		self.next = next
 
 
-## Represents a node with dialogue text and some optional parameters
+## Node with a line of text optional parameters.
 class DialogueNode:
 	extends BaseNode
 
@@ -36,9 +52,11 @@ class DialogueNode:
 		self.line = line
 
 
-## Represents a command that changes the background with an optional transition type
+## Node type for a command that changes the displayed background, with an
+## optional transition animation.
 class BackgroundCommandNode:
 	extends BaseNode
+
 	var background: String
 	var transition: String
 
@@ -47,9 +65,11 @@ class BackgroundCommandNode:
 		self.background = background
 
 
-## Represents a command that changes the scene
+## Node type for a command that makes the game jump to another scene (or restart
+## the current one).
 class SceneCommandNode:
 	extends BaseNode
+
 	var scene_path: String
 
 	func _init(next: int, scene_path: String).(next) -> void:
@@ -57,9 +77,11 @@ class SceneCommandNode:
 		self.scene_path = scene_path
 
 
-## Represents a command that runs a transition animation
+## Node type for a command that runs a scene transition animation, like a fade
+## to black.
 class TransitionCommandNode:
 	extends BaseNode
+
 	var transition: String
 
 	func _init(next: int, transition: String).(next) -> void:
@@ -67,9 +89,10 @@ class TransitionCommandNode:
 		self.transition = transition
 
 
-## Represents a branching path in the dialogue tree
+## Node type representing a player choice.
 class ChoiceTreeNode:
 	extends BaseNode
+
 	var choices: Array
 
 	func _init(next: int, choices: Array).(next) -> void:
@@ -77,22 +100,8 @@ class ChoiceTreeNode:
 		self.choices = choices
 
 
-## Represents a tree of if, elifs, and else in the script
-class ConditionalTreeNode:
-	extends BaseNode
-
-	var if_block: ConditionalBlockNode
-
-	# Array because there can be multiple elifs
-	var elif_blocks: Array
-	var else_block: ConditionalBlockNode
-
-	func _init(next: int, if_block: ConditionalBlockNode).(next) -> void:
-		self.next = next
-		self.if_block = if_block
-
-
-## Represents a conditional
+## Represents one conditional block, starting with an `if`, `elif`, or `else`
+## keyword.
 class ConditionalBlockNode:
 	extends BaseNode
 
@@ -103,9 +112,26 @@ class ConditionalBlockNode:
 		self.condition = condition
 
 
-## Represents a command that creates or modify a variable on the save file level
+## Node type representing a tree of if, elifs, and else blocks in the script.
+class ConditionalTreeNode:
+	extends BaseNode
+
+	var if_block: ConditionalBlockNode
+	# There can be multiple `elif` blocks in a row, which is why we store them
+	# in an array.
+	var elif_blocks: Array
+	var else_block: ConditionalBlockNode
+
+	func _init(next: int, if_block: ConditionalBlockNode).(next) -> void:
+		self.next = next
+		self.if_block = if_block
+
+
+## Represents a command that creates or modify a persistent variable. These
+## variables are saved in the player's save file.
 class SetCommandNode:
 	extends BaseNode
+
 	var symbol: String
 	var value
 
@@ -115,16 +141,17 @@ class SetCommandNode:
 		self.value = value
 
 
-## Repretends a command that will advance to any existing jump points
+## Node type for a command that will advance to any existing jump point.
 class JumpCommandNode:
 	extends BaseNode
+
 	var jump_point: String
 
 	func _init(next: int).(next) -> void:
 		self.next = next
 
 
-## Represents a command that will break out of any running code blocks
+## Node type for a command that will break out of any running code block.
 class PassCommandNode:
 	extends BaseNode
 
@@ -132,22 +159,11 @@ class PassCommandNode:
 		self.next = next
 
 
-# Used to distinguish choice/if block's target number
-const UNIQUE_CHOICE_ID_MODIFIER = 1000000000
-const UNIQUE_CONDITIONAL_ID_MODIFIER = 2100000000
-
-
-var _jump_points := {}
-
-# Store jump nodes with unknown jump points
-var _unresolved_jump_nodes := []
-
-
 ## Takes in a syntax tree from the SceneParser and turns it into a
-## script dictionary for the ScenePlayer
-func transpile(syntax_tree: SceneParser.SyntaxTree, starting_index: int) -> DialogueTree:
+## `DialogueTree` for the `ScenePlayer` to play.
+func transpile(syntax_tree: SceneParser.SyntaxTree, start_index: int) -> DialogueTree:
 	var dialogue_tree := DialogueTree.new()
-	dialogue_tree.index = starting_index
+	dialogue_tree.index = start_index
 
 	while not syntax_tree.is_at_end():
 		var expression: SceneParser.BaseExpression = syntax_tree.move_to_next_expression()
@@ -406,8 +422,8 @@ func transpile(syntax_tree: SceneParser.SyntaxTree, starting_index: int) -> Dial
 
 ## Adds node from a source tree to a target tree
 func _add_nodes_to_tree(original_value: int, nodes : Array, target_tree: DialogueTree, source_tree: DialogueTree) -> void:
-	# Append a `pass` node to the end of the block to make sure it'll properly end and continue
-	# to its parent block
+	# Append a `pass` node to the end of the block to make sure it'll properly
+	# end and continue to its parent block.
 	source_tree.append_node(PassCommandNode.new(original_value + 1))
 	nodes.append(source_tree.values.keys().back())
 
