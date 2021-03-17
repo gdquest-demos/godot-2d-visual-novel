@@ -153,6 +153,7 @@ class SetCommandNode:
 ## Repretends a command that will advance to any existing jump points
 class JumpCommandNode:
 	extends BaseNode
+	var jump_point: String
 
 	func _init(next: int).(next) -> void:
 		self.next = next
@@ -170,33 +171,15 @@ class PassCommandNode:
 const UNIQUE_CHOICE_ID_MODIFIER = 1000000000
 const UNIQUE_CONDITIONAL_ID_MODIFIER = 2100000000
 
+# Store jump nodes with unknown jump points
+var unresolved_jump_nodes := []
+
 
 ## Takes in a syntax tree from the SceneParser and turns it into a
 ## script dictionary for the ScenePlayer
 func transpile(syntax_tree: SceneParser.SyntaxTree, starting_index: int) -> DialogueTree:
 	var dialogue_tree := DialogueTree.new()
 	dialogue_tree.index = starting_index
-
-	# Store all the declared jump points in advance
-	var jump_index := 0
-	for expression in syntax_tree.values:
-		if (
-			expression.type == SceneParser.EXPRESSION_TYPES.COMMAND
-			and expression.value == SceneLexer.BUILT_IN_COMMANDS.MARK
-		):
-			var new_jump_point: String = (
-				expression.arguments[0].value
-				if expression.arguments[0]
-				else ""
-			)
-
-			if new_jump_point == "":
-				push_error("A `mark` command is missing an argument")
-				continue
-
-			dialogue_tree.add_jump_point(new_jump_point, jump_index)
-		else:
-			jump_index += 1
 
 	while not syntax_tree.is_at_end():
 		var expression: SceneParser.BaseExpression = syntax_tree.move_to_next_expression()
@@ -258,8 +241,15 @@ func transpile(syntax_tree: SceneParser.SyntaxTree, starting_index: int) -> Dial
 						var target = dialogue_tree.get_jump_point(jump_point)
 						dialogue_tree.append_node(JumpCommandNode.new(target))
 					else:
-						push_error("Jump point %s does not exist" % jump_point)
-						continue
+						# Store as an unresolved jump node
+
+						var jump_node = JumpCommandNode.new(-1)
+						jump_node.jump_point = jump_point
+
+						dialogue_tree.append_node(jump_node)
+
+						# Pass in the instance by reference so we can modify this later
+						unresolved_jump_nodes.append(jump_node)
 				SceneLexer.BUILT_IN_COMMANDS.TRANSITION:
 					var transition: String = (
 						expression.arguments[0].value
@@ -297,8 +287,27 @@ func transpile(syntax_tree: SceneParser.SyntaxTree, starting_index: int) -> Dial
 
 					dialogue_tree.append_node(SetCommandNode.new(dialogue_tree.index + 1, symbol, value))
 				SceneLexer.BUILT_IN_COMMANDS.MARK:
-					# Ignore since we've already handled them above
-					pass
+					var new_jump_point: String = (
+						expression.arguments[0].value
+						if expression.arguments[0]
+						else ""
+					)
+
+					if new_jump_point == "":
+						push_error("A `mark` command is missing an argument")
+						continue
+
+					dialogue_tree.add_jump_point(new_jump_point, dialogue_tree.index)
+
+					# Handle any unresolved jump nodes that point to this jump point
+					# Use a `temp` variable because modifying an array while also looping through it can get buggy
+					var temp := unresolved_jump_nodes
+					for jump_node in unresolved_jump_nodes:
+						if jump_node.jump_point == new_jump_point:
+							jump_node.next = dialogue_tree.index
+							temp.erase(jump_node)
+
+					unresolved_jump_nodes = temp
 				_:
 					push_error("Unrecognized command type `%s`" % expression.value)
 					continue

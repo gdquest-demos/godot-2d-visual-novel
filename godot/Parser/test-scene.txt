@@ -5,13 +5,10 @@ background industrial_building fade_in
 sophia happy enter left "Hi there! My name's Sophia. How about you?"
 dani neutral enter right "Hey, I'm Dani."
 
-set haha true
-
-mark rethink
-
 choice:
 	"Start over":
-		"Starting over?"
+		mark rethink
+		"Starting over?"	
 		choice:	
 			"Yes, I'm sure.":
 				"Alrighty then."
@@ -28,18 +25,27 @@ choice:
 			"No. Don't.":
 				"Well..."
 				"Be careful the next time you think about starting over!"
-				jump rethink
 	"Continue":
 		set jumped_ahead false
-		pass
 	"Jump ahead":
 		set jumped_ahead true
 		jump next_jump_point
 
 sophia "Well, let's continue."
 
-mark next_jump_point
+# Comments work!
+# "This is a commented out line"
+"Want to start over?" # Inline comment! 
+choice:	
+	"Yes":
+		jump jump_location
+	"Uhmm":
+		jump rethink
+	"No":
+		pass
 
+mark next_jump_point
+	
 "And thus started Sophia and Dani's journey."
 
 transition fade_out
