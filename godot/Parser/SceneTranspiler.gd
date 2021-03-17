@@ -438,23 +438,12 @@ func transpile(syntax_tree: SceneParser.SyntaxTree, starting_index: int) -> Dial
 
 ## Adds node from a source tree to a target tree
 func _add_nodes_to_tree(original_value: int, nodes : Array, target_tree: DialogueTree, source_tree: DialogueTree) -> void:
-	# Append a `pass` node to the end of the block to make sure it'll end and properly continue
+	# Append a `pass` node to the end of the block to make sure it'll properly end and continue
 	# to its parent block
 	source_tree.append_node(PassCommandNode.new(original_value + 1))
 	nodes.append(source_tree.values.keys().back())
 
-	# Add the else block's tree's nodes to the main dialogue tree
+	# Add the source tree's nodes to the target tree
 	for node in nodes:
 		target_tree.values[node] = source_tree.values[node]
-
-		if (
-			node == source_tree.values.keys().back()
-			and not (
-				target_tree.values[node] is JumpCommandNode
-				or target_tree.values[node] is SceneCommandNode
-				)
-			):
-			# Modify the final node's next value to properly escape out of the code block
-			target_tree.values[node].next = original_value + 1
-
 		target_tree.index += 1
