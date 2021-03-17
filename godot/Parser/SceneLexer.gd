@@ -45,7 +45,6 @@ func _init() -> void:
 ## Represents a single token.
 class Token:
 	var type: String
-
 	var value = ""
 
 	func _init(type: String, value) -> void:
@@ -64,9 +63,9 @@ class DialogueScript:
 	var _current_indent_level := 0
 	var _length := 0
 
-	func _init(_text: String) -> void:
-		self._text = _text
-		self._length = len(_text)
+	func _init(text: String) -> void:
+		self._text = text
+		self._length = len(text)
 
 	## Returns the character at the current lexer position.
 	func get_current_character() -> String:
@@ -155,7 +154,7 @@ func tokenize(input_text: String) -> Array:
 				else:
 					# Emit token(s) indicating the end of a block if the line's
 					# indent is lower than the currently tracked indent level.
-					for i in range(script._current_indent_level - line_indent_level):
+					for _i in range(script._current_indent_level - line_indent_level):
 						script._current_indent_level -= 1
 						tokens.append(Token.new(TOKEN_TYPES.END_BLOCK, ""))
 		# Handle string literals.

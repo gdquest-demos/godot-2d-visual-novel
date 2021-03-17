@@ -127,7 +127,7 @@ func run_scene() -> void:
 
 func load_scene(dialogue: SceneTranspiler.DialogueTree) -> void:
 	# The main script
-	_scene_data = dialogue.values
+	_scene_data = dialogue.nodes
 
 
 func _appear_async() -> void:

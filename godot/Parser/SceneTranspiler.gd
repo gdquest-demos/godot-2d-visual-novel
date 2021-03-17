@@ -21,11 +21,12 @@ var _unresolved_jump_nodes := []
 ## A tree of nodes representing a scene. It stores nodes in its `nodes` dictionary.
 ## See the node types below.
 class DialogueTree:
+	var nodes := {}
 	var index := 0
 
 	## Add a new node to the tree and assign it a unique index in the tree
 	func append_node(node: BaseNode) -> void:
-		values[index] = node
+		nodes[index] = node
 		index += 1
 
 
@@ -169,132 +170,11 @@ func transpile(syntax_tree: SceneParser.SyntaxTree, start_index: int) -> Dialogu
 		var expression: SceneParser.BaseExpression = syntax_tree.move_to_next_expression()
 
 		if expression.type == SceneParser.EXPRESSION_TYPES.COMMAND:
-			# Create the approriate command node
-			match expression.value:
-				SceneLexer.BUILT_IN_COMMANDS.BACKGROUND:
-					var background: String = (
-						expression.arguments[0].value
-						if expression.arguments[0]
-						else ""
-					)
-
-					if background == "":
-						push_error("A `background` command is missing an argument")
-						continue
-
-					var node := BackgroundCommandNode.new(dialogue_tree.index + 1, background)
-
-					node.transition = (
-						expression.arguments[1].value
-						if len(expression.arguments) > 1
-						else ""
-					)
-
-					dialogue_tree.append_node(node)
-				SceneLexer.BUILT_IN_COMMANDS.SCENE:
-					# For now, the command only works when next_scene is used as an argument
-					# It shouldn't be too hard to allow for file paths to be used as arguments in the future
-					var new_scene: String = (
-						expression.arguments[0].value
-						if expression.arguments[0]
-						else ""
-					)
-
-					if new_scene == "":
-						push_error("A `scene` command is missing an argument")
-						continue
-
-					dialogue_tree.append_node(SceneCommandNode.new(dialogue_tree.index + 1, new_scene))
-				SceneLexer.BUILT_IN_COMMANDS.PASS:
-					# Using `pass` is just syntactic sugar since a `pass` node is always appended at the end of each code block anyways
-					# to allow the blocks to escape to its parent properly when it's finished
-					pass
-				SceneLexer.BUILT_IN_COMMANDS.JUMP:
-					# Jump to an existing jump point
-					var jump_point: String = (
-						expression.arguments[0].value
-						if expression.arguments[0]
-						else ""
-					)
-
-					if jump_point == "":
-						push_error("A `jump` command is missing an argument")
-						continue
-
-					if _has_jump_point(jump_point):
-						var target: int = _get_jump_point(jump_point)
-						dialogue_tree.append_node(JumpCommandNode.new(target))
-					else:
-						# Store as an unresolved jump node
-
-						var jump_node := JumpCommandNode.new(-1)
-						jump_node.jump_point = jump_point
-
-						dialogue_tree.append_node(jump_node)
-
-						# Pass in the instance by reference so we can modify this later
-						_unresolved_jump_nodes.append(jump_node)
-				SceneLexer.BUILT_IN_COMMANDS.TRANSITION:
-					var transition: String = (
-						expression.arguments[0].value
-						if expression.arguments[0]
-						else ""
-					)
-
-					if transition == "":
-						push_error("A `transition` command is missing an argument")
-						continue
-
-					dialogue_tree.append_node(
-						TransitionCommandNode.new(dialogue_tree.index + 1, transition)
-					)
-				SceneLexer.BUILT_IN_COMMANDS.SET:
-					var symbol: String = (
-						expression.arguments[0].value
-						if expression.arguments[0]
-						else ""
-					)
-
-					if symbol == "":
-						push_error("A `set` command is missing an argument")
-						continue
-
-					var value = (
-						expression.arguments[1].value
-						if len(expression.arguments) > 1
-						else ""
-					)
-
-					if value == "":
-						push_error("A `set` command is missing an argument")
-						continue
-
-					dialogue_tree.append_node(SetCommandNode.new(dialogue_tree.index + 1, symbol, value))
-				SceneLexer.BUILT_IN_COMMANDS.MARK:
-					var new_jump_point: String = (
-						expression.arguments[0].value
-						if expression.arguments[0]
-						else ""
-					)
-
-					if new_jump_point == "":
-						push_error("A `mark` command is missing an argument")
-						continue
-
-					_add_jump_point(new_jump_point, dialogue_tree.index)
-
-					# Handle any unresolved jump nodes that point to this jump point
-					# Use a `temp` variable because modifying an array while also looping through it can get buggy
-					var temp := _unresolved_jump_nodes
-					for jump_node in _unresolved_jump_nodes:
-						if jump_node.jump_point == new_jump_point:
-							jump_node.next = dialogue_tree.index
-							temp.erase(jump_node)
-
-					_unresolved_jump_nodes = temp
-				_:
-					push_error("Unrecognized command type `%s`" % expression.value)
-					continue
+			var node := _transpile_command(dialogue_tree, expression)
+			# There's currently no proper error handling for commands, we skip invalid ones.
+			if node == null:
+				continue
+			dialogue_tree.append_node(node)
 		elif expression.type == SceneParser.EXPRESSION_TYPES.DIALOGUE:
 			# A dialogue node only needs the dialogue text, anything else is optional
 			var node := DialogueNode.new(dialogue_tree.index + 1, expression.value)
@@ -336,7 +216,7 @@ func transpile(syntax_tree: SceneParser.SyntaxTree, start_index: int) -> Dialogu
 				choices.append({label = block.label, target = dialogue_tree.index})
 
 				# Add the block's tree's nodes to the main dialogue tree
-				_add_nodes_to_tree(original_value, block_dialogue_tree.values.keys(), dialogue_tree, block_dialogue_tree)
+				_add_nodes_to_tree(original_value, block_dialogue_tree.nodes.keys(), dialogue_tree, block_dialogue_tree)
 
 			# Reset the index
 			dialogue_tree.index = original_value
@@ -372,7 +252,7 @@ func transpile(syntax_tree: SceneParser.SyntaxTree, start_index: int) -> Dialogu
 			var if_block_dialogue_tree: DialogueTree = transpile(if_subtree, dialogue_tree.index)
 
 			# Add the if block's tree's nodes to the main dialogue tree
-			_add_nodes_to_tree(original_value, if_block_dialogue_tree.values.keys(), dialogue_tree, if_block_dialogue_tree)
+			_add_nodes_to_tree(original_value, if_block_dialogue_tree.nodes.keys(), dialogue_tree, if_block_dialogue_tree)
 
 
 			# Transpile the elif blocks
@@ -391,7 +271,7 @@ func transpile(syntax_tree: SceneParser.SyntaxTree, start_index: int) -> Dialogu
 					elif_blocks.append(ConditionalBlockNode.new(dialogue_tree.index, elif_block.value.front()))
 
 					# Add the elif block's tree's nodes to the main dialogue tree
-					_add_nodes_to_tree(original_value, elif_block_dialogue_tree.values.keys(), dialogue_tree, elif_block_dialogue_tree)
+					_add_nodes_to_tree(original_value, elif_block_dialogue_tree.nodes.keys(), dialogue_tree, elif_block_dialogue_tree)
 
 				tree_node.elif_blocks = elif_blocks
 
@@ -408,7 +288,7 @@ func transpile(syntax_tree: SceneParser.SyntaxTree, start_index: int) -> Dialogu
 				tree_node.else_block = ConditionalBlockNode.new(dialogue_tree.index, null)
 
 				# Add the else block's tree's nodes to the main dialogue tree
-				_add_nodes_to_tree(original_value, else_block_dialogue_tree.values.keys(), dialogue_tree, else_block_dialogue_tree)
+				_add_nodes_to_tree(original_value, else_block_dialogue_tree.nodes.keys(), dialogue_tree, else_block_dialogue_tree)
 
 			# Reset the index
 			dialogue_tree.index = original_value
@@ -420,16 +300,82 @@ func transpile(syntax_tree: SceneParser.SyntaxTree, start_index: int) -> Dialogu
 	return dialogue_tree
 
 
+# Transpiles a command expression and returns the approriate command node type.
+func _transpile_command(dialogue_tree: DialogueTree, expression: SceneParser.BaseExpression) -> BaseNode:
+	var command_node: BaseNode = null
+
+	if expression.value == SceneLexer.BUILT_IN_COMMANDS.BACKGROUND:
+		var background: String = expression.arguments[0].value
+
+		command_node = BackgroundCommandNode.new(dialogue_tree.index + 1, background)
+		command_node.transition = expression.arguments[1].value
+
+	elif expression.value == SceneLexer.BUILT_IN_COMMANDS.SCENE:
+		# For now, the command only works when next_scene is used as an argument.
+		var new_scene: String = expression.arguments[0].value
+		command_node = SceneCommandNode.new(dialogue_tree.index + 1, new_scene)
+
+	elif expression.value == SceneLexer.BUILT_IN_COMMANDS.PASS:
+		# Using `pass` is just syntactic sugar since a `pass` node
+		# is always appended at the end of each code block anyways
+		# to allow the blocks to escape to its parent properly when
+		# it's finished.
+		pass
+
+	elif expression.value == SceneLexer.BUILT_IN_COMMANDS.JUMP:
+		# Jump to an existing jump point
+		var jump_point: String = expression.arguments[0].value
+		if _has_jump_point(jump_point):
+			var target: int = _get_jump_point(jump_point)
+			command_node = JumpCommandNode.new(target)
+		# Store as an unresolved jump node
+		# TODO: remove allowing for unresolved jumps?
+		else:
+			var jump_node := JumpCommandNode.new(-1)
+			jump_node.jump_point = jump_point
+			command_node = jump_node
+			# Pass in the instance by reference so we can modify this later
+			_unresolved_jump_nodes.append(jump_node)
+
+	elif expression.value == SceneLexer.BUILT_IN_COMMANDS.TRANSITION:
+		var transition: String = expression.arguments[0].value
+		command_node = TransitionCommandNode.new(dialogue_tree.index + 1, transition)
+
+	elif expression.value == SceneLexer.BUILT_IN_COMMANDS.SET:
+		var symbol: String = expression.arguments[0].value
+		var value = expression.arguments[1].value
+		command_node = SetCommandNode.new(dialogue_tree.index + 1, symbol, value)
+
+	elif expression.value == SceneLexer.BUILT_IN_COMMANDS.MARK:
+		var new_jump_point: String = expression.arguments[0].value
+		_add_jump_point(new_jump_point, dialogue_tree.index)
+
+		# Handle any unresolved jump nodes that point to this jump point
+		# Use a `temp` variable because modifying an array while also looping
+		# through it can get buggy.
+		var temp := _unresolved_jump_nodes
+		for jump_node in _unresolved_jump_nodes:
+			if jump_node.jump_point == new_jump_point:
+				jump_node.next = dialogue_tree.index
+				temp.erase(jump_node)
+
+		_unresolved_jump_nodes = temp
+	else:
+		push_error("Unrecognized command type `%s`" % expression.value)
+
+	return command_node
+
+
 ## Adds node from a source tree to a target tree
 func _add_nodes_to_tree(original_value: int, nodes : Array, target_tree: DialogueTree, source_tree: DialogueTree) -> void:
 	# Append a `pass` node to the end of the block to make sure it'll properly
 	# end and continue to its parent block.
 	source_tree.append_node(PassCommandNode.new(original_value + 1))
-	nodes.append(source_tree.values.keys().back())
+	nodes.append(source_tree.nodes.keys().back())
 
 	# Add the source tree's nodes to the target tree
 	for node in nodes:
-		target_tree.values[node] = source_tree.values[node]
+		target_tree.nodes[node] = source_tree.nodes[node]
 		target_tree.index += 1
 
 
