@@ -2,6 +2,18 @@
 class_name SceneParser
 extends Reference
 
+## Names for the possible kind of expressions supported by the parser.
+const EXPRESSION_TYPES := {
+	CONDITIONAL_TREE = "ConditionalTree",
+	CHOICE_BLOCK = "ChoiceBlock",
+	DIALOGUE = "Dialogue",
+	CHOICE = "Choice",
+	COMMAND = SceneLexer.TOKEN_TYPES.COMMAND,
+	IF = SceneLexer.TOKEN_TYPES.IF,
+	ELSE = SceneLexer.TOKEN_TYPES.ELSE,
+	ELIF = SceneLexer.TOKEN_TYPES.ELIF,
+}
+
 
 ## Represents a tree of expressions produced from a token list
 class SyntaxTree:
@@ -9,7 +21,6 @@ class SyntaxTree:
 
 	# Starts with -1 instead of 0 so the transpiler will start parsing correctly
 	var current_index := -1
-
 
 	func append_expression(expression: BaseExpression) -> void:
 		values.append(expression)
@@ -201,7 +212,9 @@ class Parser:
 				# Push the character name to the front
 				arguments.push_front(current_token)
 
-				return FunctionExpression.new(EXPRESSION_TYPES.DIALOGUE, parse_next_token().value, arguments)
+				return FunctionExpression.new(
+					EXPRESSION_TYPES.DIALOGUE, parse_next_token().value, arguments
+				)
 			else:
 				# Narrator line
 				return FunctionExpression.new(EXPRESSION_TYPES.DIALOGUE, current_token.value, [])
@@ -284,18 +297,6 @@ class Parser:
 			return BaseExpression.new(current_token.type, current_token.value)
 		else:
 			return null
-
-
-const EXPRESSION_TYPES := {
-	CONDITIONAL_TREE = "ConditionalTree",
-	CHOICE_BLOCK = "ChoiceBlock",
-	DIALOGUE = "Dialogue",
-	CHOICE = "Choice",
-	COMMAND = SceneLexer.TOKEN_TYPES.COMMAND,
-	IF = SceneLexer.TOKEN_TYPES.IF,
-	ELSE = SceneLexer.TOKEN_TYPES.ELSE,
-	ELIF = SceneLexer.TOKEN_TYPES.ELIF,
-	}
 
 
 ## Takes in a token list from the lexer and returns a syntax tree
