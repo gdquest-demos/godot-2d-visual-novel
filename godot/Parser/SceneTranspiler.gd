@@ -11,6 +11,7 @@ extends Reference
 const UNIQUE_CHOICE_ID_MODIFIER = 1000000000
 const UNIQUE_CONDITIONAL_ID_MODIFIER = 2100000000
 
+const ERROR_NONEXISTENT_JUMP_POINT := -3
 
 # A mapping of named jump points to a corresponding node in the tree.
 var _jump_points := {}
@@ -175,28 +176,17 @@ func transpile(syntax_tree: SceneParser.SyntaxTree, start_index: int) -> Dialogu
 			if node == null:
 				continue
 			dialogue_tree.append_node(node)
+
 		elif expression.type == SceneParser.EXPRESSION_TYPES.DIALOGUE:
 			# A dialogue node only needs the dialogue text, anything else is optional
-			var node := DialogueNode.new(dialogue_tree.index + 1, expression.value)
-
-			node.character = (
-				expression.arguments[0].value
-				if not expression.arguments.empty()
-				else ""
-			)
-
-			node.expression = expression.arguments[1].value if len(expression.arguments) > 1 else ""
-
-			node.animation = expression.arguments[2].value if len(expression.arguments) > 2 else ""
-
-			node.side = expression.arguments[3].value if len(expression.arguments) > 3 else ""
-
+			var node := _transpile_dialogue(dialogue_tree, expression)
 			dialogue_tree.append_node(node)
+
 		elif expression.type == SceneParser.EXPRESSION_TYPES.CHOICE:
 			var choices := []
 
-			# Stores the position for the choice tree node which has pointers to the actual choice blocks
-			# that are stored at a unique place
+			# Stores the position for the choice tree node which has pointers to the actual choice
+			# blocks that are stored at a unique place
 			var original_value: int = dialogue_tree.index
 
 			# Store the choice nodes at a normally unreacheable place in the dialogue tree
@@ -207,35 +197,42 @@ func transpile(syntax_tree: SceneParser.SyntaxTree, start_index: int) -> Dialogu
 
 				dialogue_tree.index += 1
 
-				# Any jump points, variables that get declared in the block's tree don't need to be handled since
-				# the jump_points, variables are constants that are shared between all DialogueTree instances
-				# We pass in the current index tree's index here so the subtree can transpile properly
+				# Any jump points, variables that get declared in the block's tree don't need to be
+				# handled since the jump_points, variables are constants that are shared between all
+				# DialogueTree instances
+				# We pass in the current index tree's index here so the subtree can transpile
+				# properly
 				var block_dialogue_tree: DialogueTree = transpile(subtree, dialogue_tree.index)
 
 				# Add the pointer to this code block in the choice tree
 				choices.append({label = block.label, target = dialogue_tree.index})
 
 				# Add the block's tree's nodes to the main dialogue tree
-				_add_nodes_to_tree(original_value, block_dialogue_tree.nodes.keys(), dialogue_tree, block_dialogue_tree)
+				_copy_nodes(original_value, block_dialogue_tree.nodes.keys(), dialogue_tree, block_dialogue_tree)
 
 			# Reset the index
 			dialogue_tree.index = original_value
-
 			dialogue_tree.append_node(ChoiceTreeNode.new(dialogue_tree.index + 1, choices))
+
+		# Parsing sequences of conditional blocks (if, elif, else)
 		elif expression.type == SceneParser.EXPRESSION_TYPES.CONDITIONAL_TREE:
+			# TODO: If the conditional is incorrect, it's the parser that should error out.
 			if expression.if_block == null:
 				push_error("Invalid conditional tree")
 				continue
 
-			# Stores the position for the conditional tree node which has pointers to the actual conditional blocks
-			# that are stored at a unique place
+			# We parse conditional trees by calling the `transpile()` method recursively.
+			# This is because conditional trees can contain about anything.
+			#
+			# We first store the index of the conditional tree.
 			var original_value := dialogue_tree.index
 
-			# Store the if nodes at a normally unreacheable place in the dialogue tree, apart from the choice nodes
-			dialogue_tree.index += UNIQUE_CONDITIONAL_ID_MODIFIER
-			dialogue_tree.index += 1
+			# We then offset the conditional nodes at a normally unreacheable
+			# place in the dialogue tree, apart from the choice nodes
+			dialogue_tree.index += UNIQUE_CONDITIONAL_ID_MODIFIER + 1
 
-			# The conditional tree only needs a pointer to the `if` block to be proper, elifs and else are optional
+			# The conditional tree only needs a pointer to the `if` block to be
+			# proper, elifs and else are optional
 			var tree_node = ConditionalTreeNode.new(
 				original_value + 1,
 				ConditionalBlockNode.new(
@@ -252,8 +249,7 @@ func transpile(syntax_tree: SceneParser.SyntaxTree, start_index: int) -> Dialogu
 			var if_block_dialogue_tree: DialogueTree = transpile(if_subtree, dialogue_tree.index)
 
 			# Add the if block's tree's nodes to the main dialogue tree
-			_add_nodes_to_tree(original_value, if_block_dialogue_tree.nodes.keys(), dialogue_tree, if_block_dialogue_tree)
-
+			_copy_nodes(original_value, if_block_dialogue_tree.nodes.keys(), dialogue_tree, if_block_dialogue_tree)
 
 			# Transpile the elif blocks
 			if not expression.elif_block.empty():
@@ -262,17 +258,14 @@ func transpile(syntax_tree: SceneParser.SyntaxTree, start_index: int) -> Dialogu
 				for elif_block in expression.elif_block:
 					var elif_subtree := SceneParser.SyntaxTree.new()
 					elif_subtree.values = elif_block.block
-
 					var elif_block_dialogue_tree: DialogueTree = transpile(
 						elif_subtree, dialogue_tree.index
 					)
 
-					# Store to pointer to the elif block in the choice tree node
+					# Store pointer to the elif block in the choice tree node
 					elif_blocks.append(ConditionalBlockNode.new(dialogue_tree.index, elif_block.value.front()))
-
-					# Add the elif block's tree's nodes to the main dialogue tree
-					_add_nodes_to_tree(original_value, elif_block_dialogue_tree.nodes.keys(), dialogue_tree, elif_block_dialogue_tree)
-
+					# copy the elif block's tree nodes to the main dialogue tree
+					_copy_nodes(original_value, elif_block_dialogue_tree.nodes.keys(), dialogue_tree, elif_block_dialogue_tree)
 				tree_node.elif_blocks = elif_blocks
 
 			# Transpile the else block
@@ -283,17 +276,14 @@ func transpile(syntax_tree: SceneParser.SyntaxTree, start_index: int) -> Dialogu
 				var else_block_dialogue_tree: DialogueTree = transpile(
 					else_subtree, dialogue_tree.index
 				)
-
-				# Store to pointer to the else block in the choice tree node
+				# Store pointer to the else block in the choice tree node
 				tree_node.else_block = ConditionalBlockNode.new(dialogue_tree.index, null)
-
 				# Add the else block's tree's nodes to the main dialogue tree
-				_add_nodes_to_tree(original_value, else_block_dialogue_tree.nodes.keys(), dialogue_tree, else_block_dialogue_tree)
-
+				_copy_nodes(original_value, else_block_dialogue_tree.nodes.keys(), dialogue_tree, else_block_dialogue_tree)
 			# Reset the index
 			dialogue_tree.index = original_value
-
 			dialogue_tree.append_node(tree_node)
+
 		else:
 			push_error("Unrecognized expression of type: %s with value: %s" % [expression.type, expression.value])
 
@@ -325,7 +315,7 @@ func _transpile_command(dialogue_tree: DialogueTree, expression: SceneParser.Bas
 	elif expression.value == SceneLexer.BUILT_IN_COMMANDS.JUMP:
 		# Jump to an existing jump point
 		var jump_point: String = expression.arguments[0].value
-		if _has_jump_point(jump_point):
+		if _jump_points.has(jump_point):
 			var target: int = _get_jump_point(jump_point)
 			command_node = JumpCommandNode.new(target)
 		# Store as an unresolved jump node
@@ -366,8 +356,23 @@ func _transpile_command(dialogue_tree: DialogueTree, expression: SceneParser.Bas
 	return command_node
 
 
+func _transpile_dialogue(dialogue_tree: DialogueTree, expression: SceneParser.BaseExpression) -> DialogueNode:
+	var node := DialogueNode.new(dialogue_tree.index + 1, expression.value)
+	node.character = (
+		expression.arguments[0].value
+		if not expression.arguments.empty()
+		else ""
+		)
+	node.expression = expression.arguments[1].value if len(expression.arguments) > 1 else ""
+	node.animation = expression.arguments[2].value if len(expression.arguments) > 2 else ""
+	node.side = expression.arguments[3].value if len(expression.arguments) > 3 else ""
+	return node
+
+
 ## Adds node from a source tree to a target tree
-func _add_nodes_to_tree(original_value: int, nodes : Array, target_tree: DialogueTree, source_tree: DialogueTree) -> void:
+func _copy_nodes(
+	original_value: int, nodes: Array, target_tree: DialogueTree, source_tree: DialogueTree
+) -> void:
 	# Append a `pass` node to the end of the block to make sure it'll properly
 	# end and continue to its parent block.
 	source_tree.append_node(PassCommandNode.new(original_value + 1))
@@ -381,19 +386,15 @@ func _add_nodes_to_tree(original_value: int, nodes : Array, target_tree: Dialogu
 
 func _add_jump_point(name: String, index: int) -> void:
 	if _jump_points.has(name):
-		push_error("Jump point already exists")
+		push_error("Jump point %s already exists. Can't re-create it." % name)
 		return
 
 	_jump_points[name] = index
 
 
-func _has_jump_point(name: String) -> bool:
-	return _jump_points.has(name)
-
-
 func _get_jump_point(name: String) -> int:
-	if _has_jump_point(name):
+	if _jump_points.has(name):
 		return _jump_points[name]
 
 	# -3 because -1, -2 are already used in the ScenePlayer interpreter
-	return -3
+	return ERROR_NONEXISTENT_JUMP_POINT
