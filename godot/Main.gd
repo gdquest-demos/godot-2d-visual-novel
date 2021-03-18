@@ -1,15 +1,39 @@
 extends Node
 
+
+export (Array, String, FILE) var scripts
+
 const ScenePlayer := preload("res://ScenePlayer.tscn")
 
-const SCENES := ["res://Scenes/1.scene", "res://Scenes/2.scene"]
+const SCENES := []
 
 var _current_index := -1
 var _scene_player: ScenePlayer
 
 
+var lexer := SceneLexer.new()
+var parser := SceneParser.new()
+var transpiler := SceneTranspiler.new()
+
+
 func _ready() -> void:
-	_play_scene(0)
+
+	if not scripts.empty():
+		for script in scripts:
+			var text := lexer.read_file_content(script)
+			var tokens: Array = lexer.tokenize(text)
+
+			var tree: SceneParser.SyntaxTree = parser.parse(tokens)
+
+			var dialogue: SceneTranspiler.DialogueTree = transpiler.transpile(tree, 0)
+
+			# Make sure the scene is transitioned properly at the end of the script
+			if not dialogue.nodes[dialogue.index - 1] is SceneTranspiler.JumpCommandNode:
+				(dialogue.nodes[dialogue.index - 1] as SceneTranspiler.BaseNode).next = -1
+
+			SCENES.append(dialogue)
+
+		_play_scene(0)
 
 
 func _play_scene(index: int) -> void:

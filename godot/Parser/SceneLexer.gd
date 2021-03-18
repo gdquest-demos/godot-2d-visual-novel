@@ -3,31 +3,23 @@ class_name SceneLexer
 extends Reference
 
 # The constants below list reserved keywords and built-in commands.
-const BUILT_IN_COMMANDS := [
-	"background",
-	"mark",
-	"scene",
-	"pass",
-	"jump",
-	"transition",
-	"set",
-	]
-const CONDITIONAL_STATEMENTS := [
-	"if",
-	"elif",
-	"else"
-	]
-const BOOLEAN_OPERATORS := [
-	"and",
-	"or",
-	"not"
-	]
+const BUILT_IN_COMMANDS := {
+	BACKGROUND = "background",
+	MARK = "mark",
+	SCENE = "scene",
+	PASS = "pass",
+	JUMP = "jump",
+	TRANSITION = "transition",
+	SET = "set",
+}
+const CONDITIONAL_STATEMENTS := ["if", "elif", "else"]
+const BOOLEAN_OPERATORS := ["and", "or", "not"]
 const CHOICE_KEYWORD := "choice"
 
 ## Mapping of types we can assign to `Token.type`.
 const TOKEN_TYPES := {
 	SYMBOL = "Symbol",
-	COMMAND = "Function",
+	COMMAND = "Command",
 	STRING_LITERAL = "String",
 	CHOICE = "Choice",
 	IF = "If",
@@ -40,7 +32,7 @@ const TOKEN_TYPES := {
 	AND = "And",
 	OR = "Or",
 	NOT = "Not"
-	}
+}
 
 # We allow lower and uppercase letters, numbers, and underscores in identifiers.
 var symbol_regex := RegEx.new()
@@ -53,7 +45,6 @@ func _init() -> void:
 ## Represents a single token.
 class Token:
 	var type: String
-
 	var value = ""
 
 	func _init(type: String, value) -> void:
@@ -72,9 +63,9 @@ class DialogueScript:
 	var _current_indent_level := 0
 	var _length := 0
 
-	func _init(_text: String) -> void:
-		self._text = _text
-		self._length = len(_text)
+	func _init(text: String) -> void:
+		self._text = text
+		self._length = len(text)
 
 	## Returns the character at the current lexer position.
 	func get_current_character() -> String:
@@ -163,7 +154,7 @@ func tokenize(input_text: String) -> Array:
 				else:
 					# Emit token(s) indicating the end of a block if the line's
 					# indent is lower than the currently tracked indent level.
-					for i in range(script._current_indent_level - line_indent_level):
+					for _i in range(script._current_indent_level - line_indent_level):
 						script._current_indent_level -= 1
 						tokens.append(Token.new(TOKEN_TYPES.END_BLOCK, ""))
 		# Handle string literals.
@@ -216,7 +207,6 @@ func _tokenize_symbol(script: DialogueScript) -> Token:
 	# valid identifier (isn't a digit).
 	var symbol := "%s" % script.get_current_character()
 
-
 	while not script.is_at_end_of_file():
 		var character = script.move_to_next_character()
 
@@ -230,9 +220,13 @@ func _tokenize_symbol(script: DialogueScript) -> Token:
 			push_error("Invalid character %s inside symbol" % character)
 			return Token.new("", "")
 
-	if symbol in BUILT_IN_COMMANDS:
+	if symbol in BUILT_IN_COMMANDS.values():
 		return Token.new(TOKEN_TYPES.COMMAND, symbol)
-	elif symbol in CONDITIONAL_STATEMENTS or symbol in BOOLEAN_OPERATORS or symbol == CHOICE_KEYWORD:
+	elif (
+		symbol in CONDITIONAL_STATEMENTS
+		or symbol in BOOLEAN_OPERATORS
+		or symbol == CHOICE_KEYWORD
+	):
 		return Token.new(TOKEN_TYPES[symbol.to_upper()], "")
 	else:
 		return Token.new(TOKEN_TYPES.SYMBOL, symbol)

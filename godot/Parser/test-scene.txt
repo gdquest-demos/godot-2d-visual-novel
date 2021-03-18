@@ -1,38 +1,55 @@
-background industrial_building fade_in
 mark jump_location
+
+background industrial_building fade_in
 
 sophia happy enter left "Hi there! My name's Sophia. How about you?"
 dani neutral enter right "Hey, I'm Dani."
 
-# Comment
 choice:
 	"Start over":
-		# Some empty lines below...
-
-
-		if not player_choice and another_player_choice:
-			"Starting over..."
-		else:
-			"choice unfulfilled"
-			dani surprised "Really!?"
-		jump jump_location
+		mark rethink
+		"Starting over?"	
+		choice:	
+			"Yes, I'm sure.":
+				"Alrighty then."
+				set started_over true
+				jump jump_location
+			"Uhm...":
+				"Maybe you should think about this more..."
+				choice:
+					"Yeah... maybe I should...":
+						jump rethink
+					"No... I'll do it":
+						"As you wish."
+						"Starting over..."
+						set started_over true
+						jump jump_location
+			"No. Don't.":
+				"Well..."
+				"Be careful the next time you think about starting over!"
+				set started_over false
 	"Continue":
-		pass
+		set jumped_ahead false
 	"Jump ahead":
 		set jumped_ahead true
 		jump next_jump_point
 
-sophia "Well, let's continue." # Inline comment
+sophia "Well, let's continue."
+
+# Comments work!
+# "This is a commented out line"
+"Want to start over?" # Inline comment! 
+choice:	
+	"Yes":
+		set started_over true
+		jump jump_location
+	"Uhmm":
+		jump rethink
+	"No":
+		pass
+
 mark next_jump_point
-
-if jumped_ahead:
-	background steppes
-	dani "Did you jump ahead?"
-	scene next_scene
-elif another_choice:
-	dani "I was about to say something..."
-	dani happy "But I forgot... Haha!"
-
+	
 "And thus started Sophia and Dani's journey."
 
 transition fade_out

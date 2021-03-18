@@ -34,10 +34,20 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://Parser/SceneLexer.gd"
 }, {
+"base": "Reference",
+"class": "SceneParser",
+"language": "GDScript",
+"path": "res://Parser/SceneParser.gd"
+}, {
 "base": "Node",
 "class": "ScenePlayer",
 "language": "GDScript",
 "path": "res://ScenePlayer.gd"
+}, {
+"base": "Reference",
+"class": "SceneTranspiler",
+"language": "GDScript",
+"path": "res://Parser/SceneTranspiler.gd"
 } ]
 _global_script_class_icons={
 "Background": "",
@@ -45,7 +55,9 @@ _global_script_class_icons={
 "CharacterDisplayer": "",
 "ChoiceSelector": "",
 "SceneLexer": "",
-"ScenePlayer": ""
+"SceneParser": "",
+"ScenePlayer": "",
+"SceneTranspiler": ""
 }
 
 [application]
@@ -57,6 +69,7 @@ config/icon="res://icon.png"
 [autoload]
 
 ResourceDB="*res://Autoloads/ResourceDB.gd"
+Variables="*res://Autoloads/Variables.gd"
 
 [debug]
 

@@ -32,7 +32,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func display(character: Character, side: String = SIDE.LEFT, expression := "", animation := "") -> void:
-	assert(side in SIDE.values())
+#	assert(side in SIDE.values())
 
 	# Keeps track of a character that's already displayed on a given side
 	var sprite: Sprite = _left_sprite if side == SIDE.LEFT else _right_sprite
