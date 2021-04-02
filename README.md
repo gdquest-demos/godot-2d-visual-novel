@@ -1,6 +1,6 @@
 # Godot visual novel demo
 
-![Screenshot of the visual novel game prototype](images/godot-visual-novel-prototype-screenshot.jpg)
+![Screenshot of the visual novel game prototype](images/2021-04-01-new-art.jpg)
 
 Curious to learn how a dialogue system or visual novels work? This Godot game demo is for you!
 
