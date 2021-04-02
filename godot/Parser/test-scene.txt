@@ -1,6 +1,6 @@
 mark jump_location
 
-background industrial_building fade_in
+background dani_bedroom fade_in
 
 sophia happy enter left "Hi there! My name's Sophia. How about you?"
 dani neutral enter right "Hey, I'm Dani."

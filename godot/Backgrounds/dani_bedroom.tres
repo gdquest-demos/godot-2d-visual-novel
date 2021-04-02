@@ -1,0 +1,10 @@
+[gd_resource type="Resource" load_steps=3 format=2]
+
+[ext_resource path="res://Backgrounds/dani_bedroom.jpg" type="Texture" id=1]
+[ext_resource path="res://Backgrounds/Background.gd" type="Script" id=2]
+
+[resource]
+script = ExtResource( 2 )
+id = "dani_bedroom"
+display_name = "Dani's bedroom"
+texture = ExtResource( 1 )

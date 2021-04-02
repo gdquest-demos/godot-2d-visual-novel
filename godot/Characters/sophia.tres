@@ -1,8 +1,11 @@
-[gd_resource type="Resource" load_steps=3 format=2]
+[gd_resource type="Resource" load_steps=7 format=2]
 
 [ext_resource path="res://Characters/Character.gd" type="Script" id=1]
-[ext_resource path="res://Characters/Sophia.png" type="Texture" id=2]
-
+[ext_resource path="res://Characters/Sophia/sophia_neutral.png" type="Texture" id=2]
+[ext_resource path="res://Characters/Sophia/sophia_happy.png" type="Texture" id=3]
+[ext_resource path="res://Characters/Sophia/sophia_angry.png" type="Texture" id=4]
+[ext_resource path="res://Characters/Sophia/sophia_surprised.png" type="Texture" id=5]
+[ext_resource path="res://Characters/Sophia/sophia_sad.png" type="Texture" id=6]
 
 [resource]
 script = ExtResource( 1 )
@@ -12,5 +15,9 @@ bio = "Fill this with the character's complete bio. Supports BBCode."
 age = 0
 default_image = "neutral"
 images = {
-"neutral": ExtResource( 2 )
+"angry": ExtResource( 4 ),
+"happy": ExtResource( 3 ),
+"neutral": ExtResource( 2 ),
+"sad": ExtResource( 6 ),
+"surprised": ExtResource( 5 )
 }

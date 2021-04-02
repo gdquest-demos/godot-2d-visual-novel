@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/Dani.png-cf44140dee766f6cbbcd44b1632e4451.stex"
+path="res://.import/sophia_happy.png-27c38ef069e3c391b6488f049c0b1463.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Characters/Dani.png"
-dest_files=[ "res://.import/Dani.png-cf44140dee766f6cbbcd44b1632e4451.stex" ]
+source_file="res://Characters/Sophia/sophia_happy.png"
+dest_files=[ "res://.import/sophia_happy.png-27c38ef069e3c391b6488f049c0b1463.stex" ]
 
 [params]
 
