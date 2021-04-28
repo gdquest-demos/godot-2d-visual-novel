@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/steppes.jpg-625c1f7d6f7cfc2f00dc16d90cc1a7fb.stex"
+path="res://.import/community_garden.jpg-4b07f8ae7f5752bbead2be8f6b3599fc.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Backgrounds/steppes.jpg"
-dest_files=[ "res://.import/steppes.jpg-625c1f7d6f7cfc2f00dc16d90cc1a7fb.stex" ]
+source_file="res://Backgrounds/community_garden.jpg"
+dest_files=[ "res://.import/community_garden.jpg-4b07f8ae7f5752bbead2be8f6b3599fc.stex" ]
 
 [params]
 

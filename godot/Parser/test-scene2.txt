@@ -1,4 +1,4 @@
-background steppes fade_in
+background community_garden fade_in
 
 "Welcome to the next test scene!"
 
