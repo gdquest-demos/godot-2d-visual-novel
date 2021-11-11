@@ -10,12 +10,25 @@ __meta__ = {
 "_edit_vertical_guides_": [ 1920.49 ]
 }
 
-[node name="Left" type="Sprite" parent="."]
-position = Vector2( 330.836, 655.203 )
+[node name="LeftCenter" type="Sprite" parent="."]
+modulate = Color( 0.27451, 0.27451, 0.27451, 1 )
+position = Vector2( 560.631, 659.441 )
 texture = ExtResource( 2 )
 
+[node name="Left" type="Sprite" parent="."]
+modulate = Color( 0.27451, 0.27451, 0.27451, 1 )
+position = Vector2( 279.836, 655.203 )
+texture = ExtResource( 2 )
+
+[node name="RightCenter" type="Sprite" parent="."]
+modulate = Color( 0.27451, 0.27451, 0.27451, 1 )
+position = Vector2( 1417.01, 655.203 )
+texture = ExtResource( 3 )
+flip_h = true
+
 [node name="Right" type="Sprite" parent="."]
-position = Vector2( 1592.01, 655.203 )
+modulate = Color( 0.27451, 0.27451, 0.27451, 1 )
+position = Vector2( 1664.01, 655.203 )
 texture = ExtResource( 3 )
 flip_h = true
 
