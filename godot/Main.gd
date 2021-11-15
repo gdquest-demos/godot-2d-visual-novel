@@ -53,6 +53,7 @@ func _play_scene(index: int) -> void:
 func _on_ScenePlayer_scene_finished() -> void:
 	# If the scene that ended is the last scene, we're done playing the game.
 	if _current_index == SCENES.size() - 1:
+		get_tree().quit()
 		return
 	_play_scene(_current_index + 1)
 
