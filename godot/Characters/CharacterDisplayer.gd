@@ -111,10 +111,16 @@ func _determine_focus(character_id: String, side: String, sprite: Sprite) -> voi
 
 # Fade all sprites to gray and make the non focused one colored
 func focus_sprite(sprite: Sprite = null) -> void:
-	_left_center_sprite.modulate = COLOR_SPRITE_NOT_TALKING
-	_left_sprite.modulate = COLOR_SPRITE_NOT_TALKING
-	_right_center_sprite.modulate = COLOR_SPRITE_NOT_TALKING
-	_right_sprite.modulate = COLOR_SPRITE_NOT_TALKING
+	
+	# We need to make sure not to display a sprite that has left the screen
+	if _displayed.left_center != null:
+		_left_center_sprite.modulate = COLOR_SPRITE_NOT_TALKING
+	if _displayed.left != null:
+		_left_sprite.modulate = COLOR_SPRITE_NOT_TALKING
+	if _displayed.right_center != null:
+		_right_center_sprite.modulate = COLOR_SPRITE_NOT_TALKING
+	if _displayed.right != null:
+		_right_sprite.modulate = COLOR_SPRITE_NOT_TALKING
 	
 	if _focused == SIDE.LEFT:
 		_left_sprite.modulate = COLOR_SPRITE_FOCUSED
@@ -155,7 +161,7 @@ func _enter(from_side: String, sprite: Sprite) -> void:
 # 
 #
 func _leave(from_side: String, sprite: Sprite) -> void:
-	var offset := -200 if from_side == SIDE.LEFT or SIDE.LEFT_CENTER else 200
+	var offset := -200 if (from_side == SIDE.LEFT or from_side == SIDE.LEFT_CENTER) else 200
 
 	var start := sprite.position
 	var end := sprite.position + Vector2(offset, 0.0)
@@ -192,6 +198,10 @@ func _on_tween_leave_completed(side: String, original_sprite_position: Vector2) 
 		_right_sprite.position = original_sprite_position
 	elif side == SIDE.RIGHT_CENTER:
 		_right_center_sprite.position = original_sprite_position
+	
+	# We want sprites to be able to leave and reappear somewhere else
+	# This is also needed to not show invisible sprites when an other one gets focus
+	_displayed[side] = null
 
 
 # This "animation" is used to allow a character that left the screen to say something
