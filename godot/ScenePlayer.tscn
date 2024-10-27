@@ -1,95 +1,102 @@
-[gd_scene load_steps=9 format=2]
+[gd_scene load_steps=10 format=3 uid="uid://c21qbwtg81qug"]
 
-[ext_resource path="res://TextBox/TextBox.tscn" type="PackedScene" id=1]
-[ext_resource path="res://ScenePlayer.gd" type="Script" id=2]
-[ext_resource path="res://Characters/CharacterDisplayer.tscn" type="PackedScene" id=3]
-[ext_resource path="res://Backgrounds/dani_bedroom.jpg" type="Texture" id=4]
-[ext_resource path="res://Theme/theme.tres" type="Theme" id=6]
+[ext_resource type="PackedScene" uid="uid://c3fdyxa55lvir" path="res://TextBox/TextBox.tscn" id="1"]
+[ext_resource type="Script" path="res://ScenePlayer.gd" id="2"]
+[ext_resource type="PackedScene" uid="uid://cpv668ph8f7vp" path="res://Characters/CharacterDisplayer.tscn" id="3"]
+[ext_resource type="Texture2D" uid="uid://dsq2rbfiyycqj" path="res://Backgrounds/dani_bedroom.jpg" id="4"]
+[ext_resource type="Theme" uid="uid://c7cr0spg4jdwa" path="res://Theme/theme.tres" id="6"]
 
-[sub_resource type="Animation" id=1]
+[sub_resource type="Animation" id="1"]
 resource_name = "fade_in"
 length = 0.7
 tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
 tracks/0/path = NodePath("ColorRect:modulate")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
-tracks/0/imported = false
-tracks/0/enabled = true
 tracks/0/keys = {
-"times": PoolRealArray( 0, 0.7 ),
-"transitions": PoolRealArray( 1, 1 ),
+"times": PackedFloat32Array(0, 0.7),
+"transitions": PackedFloat32Array(1, 1),
 "update": 0,
-"values": [ Color( 1, 1, 1, 1 ), Color( 1, 1, 1, 0 ) ]
+"values": [Color(1, 1, 1, 1), Color(1, 1, 1, 0)]
 }
 
-[sub_resource type="Animation" id=2]
+[sub_resource type="Animation" id="2"]
 resource_name = "fade_out"
 length = 0.7
 tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
 tracks/0/path = NodePath("ColorRect:modulate")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
-tracks/0/imported = false
-tracks/0/enabled = true
 tracks/0/keys = {
-"times": PoolRealArray( 0, 0.7 ),
-"transitions": PoolRealArray( 1, 1 ),
+"times": PackedFloat32Array(0, 0.7),
+"transitions": PackedFloat32Array(1, 1),
 "update": 0,
-"values": [ Color( 1, 1, 1, 0 ), Color( 1, 1, 1, 1 ) ]
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
 }
 
-[sub_resource type="Animation" id=3]
+[sub_resource type="Animation" id="3"]
 resource_name = "setup"
 length = 0.001
 tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
 tracks/0/path = NodePath("ColorRect:modulate")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
-tracks/0/imported = false
-tracks/0/enabled = true
 tracks/0/keys = {
-"times": PoolRealArray( 0 ),
-"transitions": PoolRealArray( 1 ),
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [ Color( 1, 1, 1, 1 ) ]
+"values": [Color(1, 1, 1, 1)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_ypy62"]
+_data = {
+"fade_in": SubResource("1"),
+"fade_out": SubResource("2"),
+"setup": SubResource("3")
 }
 
 [node name="ScenePlayer" type="Control"]
+layout_mode = 3
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 mouse_filter = 2
-theme = ExtResource( 6 )
-script = ExtResource( 2 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
+theme = ExtResource("6")
+script = ExtResource("2")
 
 [node name="Background" type="TextureRect" parent="."]
+layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2
-texture = ExtResource( 4 )
-expand = true
-__meta__ = {
-"_edit_use_anchors_": false
-}
+texture = ExtResource("4")
+expand_mode = 1
 
-[node name="CharacterDisplayer" parent="." instance=ExtResource( 3 )]
+[node name="CharacterDisplayer" parent="." instance=ExtResource("3")]
 
-[node name="TextBox" parent="." instance=ExtResource( 1 )]
+[node name="TextBox" parent="." instance=ExtResource("1")]
+layout_mode = 1
+grow_horizontal = 2
+grow_vertical = 0
 
 [node name="ColorRect" type="ColorRect" parent="."]
-modulate = Color( 1, 1, 1, 0 )
+modulate = Color(1, 1, 1, 0)
+layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2
-color = Color( 0, 0, 0, 1 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
+color = Color(0, 0, 0, 1)
 
 [node name="FadeAnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+"": SubResource("AnimationLibrary_ypy62")
+}
 autoplay = "setup"
-anims/fade_in = SubResource( 1 )
-anims/fade_out = SubResource( 2 )
-anims/setup = SubResource( 3 )

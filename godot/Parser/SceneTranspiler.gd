@@ -3,7 +3,7 @@
 ##
 ## Use the `transpile()` method to get a `DialogueTree`.
 class_name SceneTranspiler
-extends Reference
+extends RefCounted
 
 # We assign a number to every step in a generated `DialogueTree`.
 # We use the numbers below to offset the index number of choices and conditional
@@ -35,8 +35,8 @@ class DialogueTree:
 class BaseNode:
 	var next: int
 
-	func _init(next: int) -> void:
-		self.next = next
+	func _init(_next: int) -> void:
+		self.next = _next
 
 
 ## Node with a line of text optional parameters.
@@ -49,9 +49,10 @@ class DialogueNode:
 	var animation: String
 	var side: String
 
-	func _init(next: int, line: String).(next) -> void:
-		self.next = next
-		self.line = line
+	func _init(_next: int, _line: String) -> void:
+		super(next)
+		self.next = _next
+		self.line = _line
 
 
 ## Node type for a command that changes the displayed background, with an
@@ -62,9 +63,12 @@ class BackgroundCommandNode:
 	var background: String
 	var transition: String
 
-	func _init(next: int, background: String).(next) -> void:
-		self.next = next
-		self.background = background
+	func _init(_next: int, _background: String) -> void:
+		super(_next)
+		self.background = _background
+	
+	func _to_string() -> String:
+		return "{next: %s, bg: %s, tr: %s}" % [next, background, transition]
 
 
 ## Node type for a command that makes the game jump to another scene (or restart
@@ -74,9 +78,9 @@ class SceneCommandNode:
 
 	var scene_path: String
 
-	func _init(next: int, scene_path: String).(next) -> void:
-		self.next = next
-		self.scene_path = scene_path
+	func _init(_next: int, _scene_path: String) -> void:
+		super(_next)
+		self.scene_path = _scene_path
 
 
 ## Node type for a command that runs a scene transition animation, like a fade
@@ -86,9 +90,9 @@ class TransitionCommandNode:
 
 	var transition: String
 
-	func _init(next: int, transition: String).(next) -> void:
-		self.next = next
-		self.transition = transition
+	func _init(_next: int, _transition: String) -> void:
+		super(_next)
+		self.transition = _transition
 
 
 ## Node type representing a player choice.
@@ -97,9 +101,10 @@ class ChoiceTreeNode:
 
 	var choices: Array
 
-	func _init(next: int, choices: Array).(next) -> void:
-		self.next = next
-		self.choices = choices
+	func _init(_next: int, _choices: Array) -> void:
+		super(_next)
+		self.next = _next
+		self.choices = _choices
 
 
 ## Represents one conditional block, starting with an `if`, `elif`, or `else`
@@ -109,9 +114,9 @@ class ConditionalBlockNode:
 
 	var condition: SceneParser.BaseExpression
 
-	func _init(next: int, condition: SceneParser.BaseExpression).(next) -> void:
-		self.next = next
-		self.condition = condition
+	func _init(_next: int, _condition: SceneParser.BaseExpression) -> void:
+		super(_next)
+		self.condition = _condition
 
 
 ## Node type representing a tree of if, elifs, and else blocks in the script.
@@ -124,9 +129,9 @@ class ConditionalTreeNode:
 	var elif_blocks: Array
 	var else_block: ConditionalBlockNode
 
-	func _init(next: int, if_block: ConditionalBlockNode).(next) -> void:
-		self.next = next
-		self.if_block = if_block
+	func _init(_next: int, _if_block: ConditionalBlockNode) -> void:
+		super(_next)
+		self.if_block = _if_block
 
 
 ## Represents a command that creates or modify a persistent variable. These
@@ -137,10 +142,10 @@ class SetCommandNode:
 	var symbol: String
 	var value
 
-	func _init(next: int, symbol: String, value).(next) -> void:
-		self.next = next
-		self.symbol = symbol
-		self.value = value
+	func _init(_next: int, _symbol: String, _value) -> void:
+		super(_next)
+		self.symbol = _symbol
+		self.value = _value
 
 
 ## Node type for a command that will advance to any existing jump point.
@@ -149,16 +154,16 @@ class JumpCommandNode:
 
 	var jump_point: String
 
-	func _init(next: int).(next) -> void:
-		self.next = next
+	func _init(_next: int) -> void:
+		super(_next)
 
 
 ## Node type for a command that will break out of any running code block.
 class PassCommandNode:
 	extends BaseNode
 
-	func _init(next: int).(next) -> void:
-		self.next = next
+	func _init(_next: int) -> void:
+		super(_next)
 
 
 ## Takes in a syntax tree from the SceneParser and turns it into a
@@ -252,7 +257,7 @@ func transpile(syntax_tree: SceneParser.SyntaxTree, start_index: int) -> Dialogu
 			_copy_nodes(original_value, if_block_dialogue_tree.nodes.keys(), dialogue_tree, if_block_dialogue_tree)
 
 			# Transpile the elif blocks
-			if not expression.elif_block.empty():
+			if not expression.elif_block.is_empty():
 				var elif_blocks := []
 
 				for elif_block in expression.elif_block:
@@ -360,7 +365,7 @@ func _transpile_dialogue(dialogue_tree: DialogueTree, expression: SceneParser.Ba
 	var node := DialogueNode.new(dialogue_tree.index + 1, expression.value)
 	node.character = (
 		expression.arguments[0].value
-		if not expression.arguments.empty()
+		if not expression.arguments.is_empty()
 		else ""
 		)
 	node.expression = expression.arguments[1].value if len(expression.arguments) > 1 else ""

@@ -17,10 +17,10 @@ const TRANSITIONS := {
 
 var _scene_data := {}
 
-onready var _text_box := $TextBox
-onready var _character_displayer := $CharacterDisplayer
-onready var _anim_player: AnimationPlayer = $FadeAnimationPlayer
-onready var _background := $Background
+@onready var _text_box := $TextBox
+@onready var _character_displayer := $CharacterDisplayer
+@onready var _anim_player: AnimationPlayer = $FadeAnimationPlayer
+@onready var _background := $Background
 
 
 func run_scene() -> void:
@@ -44,19 +44,19 @@ func run_scene() -> void:
 			var expression: String = node.expression
 			_character_displayer.display(character, side, expression, animation)
 			if not "line" in node:
-				yield(_character_displayer, "display_finished")
+				await _character_displayer.display_finished
 
 		# Normal text reply.
 		if "line" in node:
 			_text_box.display(node.line, character.display_name)
-			yield(_text_box, "next_requested")
+			await _text_box.next_requested
 			key = node.next
 
 		# Transition animation.
 		elif "transition" in node:
 			if node.transition != "":
 				call(TRANSITIONS[node.transition])
-				yield(self, "transition_finished")
+				await self.transition_finished
 			key = node.next
 
 		# Manage variables
@@ -74,16 +74,16 @@ func run_scene() -> void:
 		# Choices.
 		elif node is SceneTranspiler.ChoiceTreeNode:
 			# Temporary fix for the buttons not showing when there are consecutive choice nodes
-			yield(get_tree(), "idle_frame")
-			yield(get_tree(), "idle_frame")
-			yield(get_tree(), "idle_frame")
+			await get_tree().process_frame
+			await get_tree().process_frame
+			await get_tree().process_frame
 
 			_text_box.display_choice(node.choices)
 
-			key = yield(_text_box, "choice_made")
+			key = await _text_box.choice_made
 
 			if key == KEY_RESTART_SCENE:
-				emit_signal("restart_requested")
+				restart_requested.emit()
 				return
 		elif node is SceneTranspiler.ConditionalTreeNode:
 			var variables_list: Dictionary = Variables.get_stored_variables_list()
@@ -122,7 +122,7 @@ func run_scene() -> void:
 			key = node.next
 
 	_character_displayer.hide()
-	emit_signal("scene_finished")
+	scene_finished.emit()
 
 
 func load_scene(dialogue: SceneTranspiler.DialogueTree) -> void:
@@ -132,21 +132,22 @@ func load_scene(dialogue: SceneTranspiler.DialogueTree) -> void:
 
 func _appear_async() -> void:
 	_anim_player.play("fade_in")
-	yield(_anim_player, "animation_finished")
-	yield(_text_box.fade_in_async(), "completed")
-	emit_signal("transition_finished")
+	await _anim_player.animation_finished
+	#await _text_box.fade_in_async().completed
+	await _text_box.fade_in_async()
+	transition_finished.emit()
 
 
 func _disappear_async() -> void:
-	yield(_text_box.fade_out_async(), "completed")
+	#await _text_box.fade_out_async().completed
+	await _text_box.fade_out_async()
 	_anim_player.play("fade_out")
-	yield(_anim_player, "animation_finished")
-	emit_signal("transition_finished")
+	await _anim_player.animation_finished
+	transition_finished.emit()
 
 
 ## Saves a dictionary representing a scene to the disk using `var2str`.
 func _store_scene_data(data: Dictionary, path: String) -> void:
-	var file := File.new()
-	file.open(path, File.WRITE)
-	file.store_string(var2str(_scene_data))
+	var file := FileAccess.open(path, FileAccess.WRITE)
+	file.store_string(var_to_str(_scene_data))
 	file.close()

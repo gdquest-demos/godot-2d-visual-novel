@@ -3,8 +3,8 @@ extends Node
 
 const NARRATOR_ID := "narrator"
 
-onready var _characters := _load_resources("res://Characters/", "_is_character")
-onready var _backgrounds := _load_resources("res://Backgrounds/", "_is_background")
+@onready var _characters := _load_resources("res://Characters/", "_is_character")
+@onready var _backgrounds := _load_resources("res://Backgrounds/", "_is_background")
 
 
 func get_character(character_id: String) -> Character:
@@ -23,17 +23,17 @@ func get_background(background_id: String) -> Background:
 ## As we don't have generics in GDScript, we pass a function's name to do type checks.
 ## We call that function on each loaded resource with `call()`.
 func _load_resources(directory_path: String, check_type_function: String) -> Dictionary:
-	var directory := Directory.new()
-	if directory.open(directory_path) != OK:
+	var directory := DirAccess.open(directory_path)
+	if not directory:
 		return {}
 
 	var resources := {}
 
-	directory.list_dir_begin()
+	directory.list_dir_begin() # TODOConverter3To4 fill missing arguments https://github.com/godotengine/godot/pull/40547
 	var filename = directory.get_next()
 	while filename != "":
 		if filename.ends_with(".tres"):
-			var resource: Resource = load(directory_path.plus_file(filename))
+			var resource: Resource = load(directory_path.path_join(filename))
 
 			if not call(check_type_function, resource):
 				continue

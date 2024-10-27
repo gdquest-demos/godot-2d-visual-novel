@@ -1,6 +1,6 @@
 ## Reads a scene _text file and turns it into a list of `Token` objects, using its `tokenize()` method.
 class_name SceneLexer
-extends Reference
+extends RefCounted
 
 # The constants below list reserved keywords and built-in commands.
 const BUILT_IN_COMMANDS := {
@@ -47,9 +47,9 @@ class Token:
 	var type: String
 	var value = ""
 
-	func _init(type: String, value) -> void:
-		self.type = type
-		self.value = value
+	func _init(_type: String, _value) -> void:
+		self.type = _type
+		self.value = _value
 
 	func _to_string() -> String:
 		return "{ type = \"%s\", value = \"%s\" }" % [self.type, self.value]
@@ -113,21 +113,19 @@ class DialogueScript:
 
 ## Reads a text file and returns its content.
 func read_file_content(path: String) -> String:
-	var file := File.new()
-
-	if not file.file_exists(path):
+	if not FileAccess.file_exists(path):
 		push_error("Could not find the script with path: %s" % path)
 		return ""
 
-	file.open(path, File.READ)
+	var file := FileAccess.open(path, FileAccess.READ)
 	var script := file.get_as_text()
 	file.close()
 	return script
 
 
 ## Turns the `input_text` into an array of `Token` objects.
-func tokenize(input_text: String) -> Array:
-	var tokens := []
+func tokenize(input_text: String) -> Array[Token]:
+	var tokens : Array[Token] = []
 	var script := DialogueScript.new(input_text)
 
 	while not script.is_at_end_of_file():
@@ -175,7 +173,7 @@ func tokenize(input_text: String) -> Array:
 		elif character.is_valid_identifier():
 			tokens.append(_tokenize_symbol(script))
 		else:
-			push_error("Found unidentified character: %s" % character)
+			push_error("Found unidentified character: %s : %s" % [character, character.unicode_at(0)])
 
 		script.move_to_next_character()
 
@@ -213,11 +211,11 @@ func _tokenize_symbol(script: DialogueScript) -> Token:
 		# Only add characters that match the regex.
 		if symbol_regex.search(character):
 			symbol += character
-		elif character in [" ", "\n", ":"]:
+		elif character in ["	", " ", "\n", "\r", ":"]:
 			script.move_to_previous_character()
 			break
 		else:
-			push_error("Invalid character %s inside symbol" % character)
+			push_error("Invalid character %s inside symbol (%s)" % [character, character.unicode_at(0)])
 			return Token.new("", "")
 
 	if symbol in BUILT_IN_COMMANDS.values():
