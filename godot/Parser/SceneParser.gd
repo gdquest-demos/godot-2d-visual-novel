@@ -1,6 +1,6 @@
 ## Takes in token list and produces a `SyntaxTree` representation of the token list using the `parse` function
 class_name SceneParser
-extends Reference
+extends RefCounted
 
 ## Names for the possible kind of expressions supported by the parser.
 const EXPRESSION_TYPES := {
@@ -17,7 +17,7 @@ const EXPRESSION_TYPES := {
 
 ## Represents a tree of expressions produced from a token list
 class SyntaxTree:
-	var values := []
+	var values : Array = []
 
 	# Starts with -1 instead of 0 so the transpiler will start parsing correctly
 	var current_index := -1
@@ -45,9 +45,12 @@ class BaseExpression:
 	var type: String
 	var value
 
-	func _init(type: String, value) -> void:
-		self.type = type
-		self.value = value
+	func _init(_type: String, _value) -> void:
+		self.type = _type
+		self.value = _value
+
+	func _to_string() -> String:
+		return "{type: %s, val: %s}" % [type, value]
 
 
 ## Represents an expression that can have arguments
@@ -55,10 +58,13 @@ class FunctionExpression:
 	extends BaseExpression
 	var arguments: Array
 
-	func _init(type: String, value: String, arguments: Array).(type, value) -> void:
-		self.type = type
-		self.value = value
-		self.arguments = arguments
+	func _init(_type: String, _value: String, _arguments: Array) -> void:
+		super(_type, _value)
+		self.arguments = _arguments
+	
+	func _to_string() -> String:
+		return "{type: %s, val: %s, args: %s (size: %s)}" % [type, value, "".join(arguments), arguments.size()]
+
 
 
 ## Represents a labeled block in a choice tree that contains expressions
@@ -66,10 +72,12 @@ class ChoiceBlockExpression:
 	extends BaseExpression
 	var label := ""
 
-	func _init(type: String, value: Array, label: String).(type, value) -> void:
-		self.type = type
-		self.value = value
-		self.label = label
+	func _init(_type: String, _value: Array, _label: String) -> void:
+		super(_type, _value)
+		self.label = _label
+	
+	func _to_string() -> String:
+		return "{type: %s, val: %s, label: %s}" % [type, value, label]
 
 
 ## Represents a single expression with a boolean condition and a block containing expressions
@@ -77,10 +85,12 @@ class ConditionalExpression:
 	extends BaseExpression
 	var block: Array
 
-	func _init(type: String, value, block: Array).(type, value) -> void:
-		self.type = type
-		self.value = value
-		self.block = block
+	func _init(_type: String, _value, _block: Array) -> void:
+		super(_type, _value)
+		self.block = _block
+	
+	func _to_string() -> String:
+		return "{type: %s, val: %s, block: %s}" % [type, value, "".join(block)]
 
 
 ## Represents a tree of ConditionalExpressions
@@ -91,17 +101,19 @@ class ConditionalTreeExpression:
 	var else_block: ConditionalExpression
 
 	func _init(
-		type: String,
-		value: String,
-		if_block: ConditionalExpression,
-		elif_block: Array,
-		else_block: ConditionalExpression
-	).(type, value) -> void:
-		self.type = type
-		self.value = value
-		self.if_block = if_block
-		self.elif_block = elif_block
-		self.else_block = else_block
+		_type: String,
+		_value: String,
+		_if_block: ConditionalExpression,
+		_elif_block: Array,
+		_else_block: ConditionalExpression
+	) -> void:
+		super(_type, _value)
+		self.if_block = _if_block
+		self.elif_block = _elif_block
+		self.else_block = _else_block
+	
+	func _to_string() -> String:
+		return "{type: %s, val: %s, if: %s, elif: %s, else: %s}" % [type, value, if_block, "".join(elif_block), else_block]
 
 
 ## Class used to help the process of parsing through the token list

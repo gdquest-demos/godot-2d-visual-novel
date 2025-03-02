@@ -4,37 +4,42 @@ extends Node
 const SAVE_FILE_LOCATION := "user://2DVisualNovelDemo.save"
 
 
-func add_variable(name: String, value) -> void:
-	var save_file: File = File.new()
+func add_variable(_name: String, value) -> void:
+	var save_file := FileAccess.open(SAVE_FILE_LOCATION, FileAccess.WRITE_READ)
 
-	save_file.open(SAVE_FILE_LOCATION, File.READ_WRITE)
-
+	var json = JSON.new()
+	var error = json.parse(save_file.get_as_text())
+	
 	var data: Dictionary = (
-		parse_json(save_file.get_as_text())
-		if save_file.get_as_text()
+		json.data
+		if error == OK
 		else {variables = {}}
 	)
 
-	if name != "":
+	if _name != "":
 		if not data.has("variables"):
 			data["variables"] = {}
 
-		data["variables"][name] = _evaluate(value)
+		data["variables"][_name] = _evaluate(value)
 
-	save_file.store_line(to_json(data))
+	save_file.store_line(JSON.stringify(data))
 	save_file.close()
 
 
 func get_stored_variables_list() -> Dictionary:
-	var save_file: File = File.new()
-
 	# Stop if the save file doesn't exist
-	if not save_file.file_exists(SAVE_FILE_LOCATION):
+	if not FileAccess.file_exists(SAVE_FILE_LOCATION):
 		return {}
 
-	save_file.open(SAVE_FILE_LOCATION, File.READ)
+	var save_file = FileAccess.open(SAVE_FILE_LOCATION, FileAccess.READ)
+	var save_file_string = save_file.get_as_text()
+	var test_json_conv = JSON.new()
+	var parse_error = test_json_conv.parse(save_file_string)
+	if parse_error != OK:
+		print("JSON Parse Error: ", test_json_conv.get_error_message(), " at line ", test_json_conv.get_error_line())
+		return {}
 
-	var data: Dictionary = parse_json(save_file.get_as_text())
+	var data: Dictionary = test_json_conv.data
 
 	save_file.close()
 
@@ -46,6 +51,6 @@ func _evaluate(input):
 	var script = GDScript.new()
 	script.set_source_code("func eval():\n\treturn " + input)
 	script.reload()
-	var obj = Reference.new()
+	var obj = RefCounted.new()
 	obj.set_script(script)
 	return obj.eval()
